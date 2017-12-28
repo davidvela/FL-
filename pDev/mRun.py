@@ -59,7 +59,7 @@ ninp, nout  = md.mainRead()
 #ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
 print("___Data Read!")
 
-epochs   = 200 #100
+epochs   = 5 #100
 lr       = 0.001 #0.0001
 h      = [100 , 100]
 # h      = [40 , 10]
@@ -87,9 +87,9 @@ def fc(inp, nodes, kp, is_train):
     h = tf.nn.dropout(h, kp)
     return h
 def build_network2(is_train=False):     # Simple NN - with batch normalization (high level)
-    if   md.dtype == "C1": top_k = 5
-    elif md.dtype == "C4": top_k = 3
-    elif md.dtype == "C2": top_k = 2
+    if   md.dType == "C1": top_k = 5
+    elif md.dType == "C4": top_k = 3
+    elif md.dType == "C2": top_k = 2
 
     kp = 0.5
     inp = x
