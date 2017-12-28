@@ -58,7 +58,7 @@ md.dType      = "C1" #C1, C2, C4
 ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
 print("___Data Read!")
 
-epochs   = 200 #100
+epochs   = 100 #100
 lr       = 0.001 #0.0001
 h      = [100 , 100]
 # h      = [40 , 10]
