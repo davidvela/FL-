@@ -54,7 +54,7 @@ def c2(df, rv=1):
     if rv == 1:
         if( df < 60 ):                  return [1,0]  
         elif( df >= 60 ):               return [0,1]      
-    elif rf==2: 
+    elif rv==2: 
         if( df < 60 ):                  return 0
         elif( df >= 60 ):               return 1
 def c4(df, rv=1):
@@ -63,7 +63,7 @@ def c4(df, rv=1):
         elif( df >= 23 and df < 60 ):   return [0,1,0,0]  #1
         elif( df >= 60 and df < 93 ):   return [0,0,1,0]  #2
         elif( df >= 93 ):               return [0,0,0,1]  #3    
-    elif rf==2: 
+    elif rv==2: 
         if( df < 23 ):                  return 0
         elif( df >= 23 and df < 60 ):   return 1
         elif( df >= 60 and df < 93 ):   return 2

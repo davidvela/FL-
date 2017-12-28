@@ -53,13 +53,12 @@ print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
 md.DESC       = "FRFLO"
 md.spn        = 5000  
 md.dType      = "C1" #C1, C2, C4
-ninp, nout  = md.mainRead()
-
+# ninp, nout  = md.mainRead()
 # md.DESC     = "FREXP"
-#ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
 print("___Data Read!")
 
-epochs   = 5 #100
+epochs   = 200 #100
 lr       = 0.001 #0.0001
 h      = [100 , 100]
 # h      = [40 , 10]
@@ -329,10 +328,10 @@ def mainRun():
     build_network3()
 
     print(model_path)
-    # print(get_hpar() ); return 
     # epochs     = 10
-    train(epochs, disp, batch_size)
-    evaluate( )
+
+    # train(epochs, disp, batch_size)
+    # evaluate( )
     url_test = md.LOGDAT + "FREXP1/" ;
     tests(url_test, p_col=False  )
     vis_chart( )
