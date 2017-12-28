@@ -73,7 +73,7 @@ model_path = md.MODEL_DIR + "model.ckpt"
 
 disp       = 5
 batch_size = 128
-top_k = 2 
+
 
 # NETWORK-----------------------------------------------------
 print( get_nns() )
@@ -87,6 +87,10 @@ def fc(inp, nodes, kp, is_train):
     h = tf.nn.dropout(h, kp)
     return h
 def build_network2(is_train=False):     # Simple NN - with batch normalization (high level)
+    if   md.dtype == "C1": top_k = 5
+    elif md.dtype == "C4": top_k = 3
+    elif md.dtype == "C2": top_k = 2
+
     kp = 0.5
     inp = x
     # h0 = fc(x,  h[0], kp, is_train)
