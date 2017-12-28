@@ -50,13 +50,16 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
 
 # READ DATA -------------------------------------------------
 print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-# md.spn = 200
+md.DESC       = "FRFLO"
+md.spn        = 5000  
+md.dType      = "C1" #C1, C2, C4
 ninp, nout  = md.mainRead()
+
 # md.DESC     = "FREXP"
 #ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
 print("___Data Read!")
 
-epochs   = 5 #100
+epochs   = 200 #100
 lr       = 0.001 #0.0001
 h      = [100 , 100]
 # h      = [40 , 10]
@@ -132,15 +135,29 @@ def build_network1( ):                  # Simple NN - 2layers - matmul
 
 
     return out, accuracy, softmaxT, biases, weights
-# prediction, accuracy, softmaxT, biases, weights = build_network1()
-prediction, accuracy, softmaxT = build_network2()
-with tf.name_scope("xent"): #loss
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
-    tf.summary.scalar("xent", cost)
-with tf.name_scope("train"): #optimizer
-    optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
-summ = tf.summary.merge_all()
-saver= tf.train.Saver()
+def build_network3():
+    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver
+    prediction, accuracy, softmaxT = build_network2()
+    with tf.name_scope("xent"): #loss
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+        tf.summary.scalar("xent", cost)
+    with tf.name_scope("train"): #optimizer
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
+    summ = tf.summary.merge_all()
+    saver= tf.train.Saver()
+
+ 
+def old():
+    # prediction, accuracy, softmaxT, biases, weights = build_network1()
+    prediction, accuracy, softmaxT = build_network2()
+
+    with tf.name_scope("xent"): #loss
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+        tf.summary.scalar("xent", cost)
+    with tf.name_scope("train"): #optimizer
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
+    summ = tf.summary.merge_all()
+    saver= tf.train.Saver()
 
 def restore_model(sess):   
     saver= tf.train.Saver() 
@@ -305,6 +322,8 @@ def vis_chart( ):
     return
 
 def mainRun(): 
+    build_network3()
+
     print(model_path)
     # print(get_hpar() ); return 
     # epochs     = 10

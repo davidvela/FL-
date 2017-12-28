@@ -30,11 +30,10 @@ type_sep   = False
 
 DESC       = "FRFLO"
 spn        = 5000  
+dType      = "C4" #C1, C2, C4
 
 # DESC       = "FRALL1"
 # spn        = 10000  #5000 -1 = all for training 
-
-dType      = "C4" #C1, C2, C4
 
 #---------------------------------------------------------------------
 MODEL_DIR  = LOGDIR + DESC + '/'   
@@ -144,7 +143,9 @@ def mainRead(filt=["", 0]):
     print(des())
     
     start = time.time()
+    
     read_data1(ALL_DS, typeSep = type_sep, filt=filt[0], filtn=filt[1] ) 
+    
     elapsed_time = float(time.time() - start)
     print("data read - lenTrain={}-{} & lenEv={}-{} time:{}" .format(len(dataT["data"]), len(dataT["label"]),len(dataE["data"]),len(dataE["label"]),elapsed_time ))
 
