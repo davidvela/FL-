@@ -247,15 +247,16 @@ def tests(url_test = 'url', p_col=False):
     
     # Load test data 
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
-    if p_col: dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
+    if p_col:                   # test columns 
+        dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
     else: 
-        if url_test != 'url':  
+        if url_test != 'url':   # test  file 
             md.DESC     = "FREXP1_X"
             json_data = url_test + "data_jsonX.txt"
             tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
             tmpLab = tmpLab.loc[:,'fp']
             abstcc = False
-        else: 
+        else:                   # get data test JSON = url
             json_str, tmpLab = get_data_test("FRALL")
             json_data = json.loads(json_str)
             abstcc = True
@@ -319,13 +320,12 @@ def mainRun():
     global ninp, nout, model_path
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
     # DATA READ 
-    # ninp, nout    = md.mainRead()
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    md.mainRead3(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout = md.getnn()
     print(len(md.dst))
-    # ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
 

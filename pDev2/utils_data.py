@@ -157,31 +157,8 @@ def mainRead(filt=["", 0]):
     dataE= convert_2List(dataE)
     return ninp, nout
 
-def mainRead2(path, part, batch_size):  # read by partitions! 
-    global ninp, nout, dataT, dataE, spn;
-    start = time.time()
-    columns = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" ,skiprows=0, nrows=1)
-    dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" ,skiprows=part*batch_size+1, nrows=batch_size, names = columns.columns)
-    dst = dst.fillna(0)
-    dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc( x )))  
-    
-    if batch_size > spn: spn = -1
-    dst = dst.sample(frac=1).reset_index(drop=True) 
-    dataT  = {'label' : dst.loc[spn:,'FP_P'] , 'data' :  dst.iloc[spn:, 3:] }
-    dataE  = {'label' : dst.loc[:spn-1,'FP_P'] , 'data' :  dst.iloc[:spn, 3:] }
-
-    elapsed_time = float(time.time() - start)
-    print("data read - lenTrain={}-{} & lenEv={}-{} time:{}" .format(len(dataT["data"]), len(dataT["label"]),len(dataE["data"]),len(dataE["label"]), elapsed_time ))
-   
-    ninp  = len(dataT["data"].columns)
-
-    dataT= convert_2List(dataT)
-    dataE= convert_2List(dataE)
-    return ninp, nout
-
-def mainRead3( path, part, batch_size , all = True, shuffle = True):  
-    # read by partitions!   
-    global  spn, dst;
+def mainRead2(path, part, batch_size,  all = True, shuffle = True):  # read by partitions! 
+    global spn, dst #ninp, nout, dataT, dataE, spn;
     start = time.time()
     if all:  dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" )
     else:     
@@ -190,20 +167,24 @@ def mainRead3( path, part, batch_size , all = True, shuffle = True):
                            nrows=batch_size, names = columns.columns)
     
     dst = dst.fillna(0)
+    
     if shuffle: dst = dst.sample(frac=1).reset_index(drop=True) 
     dst.insert(2, 'FP_P', dst['FP'] )  
+    
     elapsed_time = float(time.time() - start)
     print("data read - {} - time:{}" .format(len(dst), elapsed_time ))
 
-    # #dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc( x )))  
+    # dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc( x )))  
     # if batch_size > spn: spn = -1
     # dst = dst.sample(frac=1).reset_index(drop=True) 
     # dataT  = {'label' : dst.loc[spn:,'FP_P'] , 'data' :  dst.iloc[spn:, 3:] }
     # dataE  = {'label' : dst.loc[:spn-1,'FP_P'] , 'data' :  dst.iloc[:spn, 3:] }
-    #print("data read - lenTrain={}-{} & lenEv={}-{} time:{}" .format(len(dataT["data"]), 
-    #    len(dataT["label"]),len(dataE["data"]),len(dataE["label"]), elapsed_time ))
+    # elapsed_time = float(time.time() - start)
+    # print("data read - lenTrain={}-{} & lenEv={}-{} time:{}" .format(len(dataT["data"]), len(dataT["label"]),len(dataE["data"]),len(dataE["label"]), elapsed_time ))
+    # ninp  = len(dataT["data"].columns)
     # dataT= convert_2List(dataT)
     # dataE= convert_2List(dataE)
+    # return ninp, nout
  
 def getnn():
     ninp = len(dst.columns) - 3 

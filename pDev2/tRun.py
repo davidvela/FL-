@@ -5,27 +5,32 @@ import mRun as mr
 import utils_data as md
 
 executions = [
-{ 'dt':'C2', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-# { 'dt':'C4', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-# { 'dt':'C1', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+{ 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+{ 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+{ 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
 ]
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_"
-    for ex in executions:
-        md.DESC       = ex["de"]
-        md.spn        = ex["spn"]  
-        md.dType      = ex["dt"]
-        epochs        = ex["e"]
+    final = "_" ; md.DESC = "FRFLO"; ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
+    # DATA READ 
+    ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
+    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
 
-        mr.ninp, mr.nout    = md.mainRead()
+    for ex in executions:
+        md.spn = ex["spn"]; md.dType = ex["dt"]; epochs = ex["e"]
+        
+        md.normalize()
+        mr.ninp, mr.nout = md.getnn()
         md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(epochs, final=final) +"/" 
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()
         print(mr.model_path)    
 
-        # mr.evaluate( )
+        mr.evaluate( )
+
+
         url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
         mr.tests(url_test, p_col=True  )
 
