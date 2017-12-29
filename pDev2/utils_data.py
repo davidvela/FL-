@@ -215,34 +215,37 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
     return gt3, gtM 
 
-def feed_data(dataJJ, p_abs, d_st = False, p_exp=False, pand=False, p_col = False):
+def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
     indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
  
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
+    
+    
+
     col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
     col_df = col_df.fillna(0)
     print("input-no={}".format( len(col_df )))
-    
-    if p_exp:   indx.append(i for i in range(103))
-    else:       indx = col_df.index
-    
-    if p_col: 
+    #indx = col_df.index
+    if p_col:    
         dataTest_label = []
         dataJJ = "["
         for i in range(len(col_df)): 
-            dataTest_label.append( cc( int(  col_df.iloc[i]["fp"]  )  )) 
-            dataJJ += '{"m":"'+str(i)+'",'+'"'+str(col_df.iloc[i].name)+'"'+":1},"
+            #fpp = cc( int(  col_df.iloc[i]["fp"]  ))
+            fpp = int(  col_df.iloc[i]["fp"]  )
+            dataTest_label.append(  fpp ) 
+            #dataJJ += '{"m":"'+str(i)+'",'+'"'+str(col_df.iloc[i].name)+'"'+":1},"
+            dataJJ += '{"m":"'+str(col_df.iloc[i].name)+'",'+'"'+str(col_df.iloc[i].name)+'"'+":1},"
         dataJJ += '{"m":"0"}]';  dataTest_label.append(cc(0))
         # dataJJ += ']'
         dataJJ = json.loads(dataJJ)
 
-    json_df  = pd.DataFrame(columns=indx); df_entry = pd.Series(index=indx)
+    json_df  = pd.DataFrame(columns=dst.columns); df_entry = pd.Series(index=dst.columns)
     df_entry = df_entry.fillna(0) 
-   
     ccount = Counter()
     if(isinstance(dataJJ, list)):json_data = dataJJ
     else: json_str=open(dataJJ).read();  json_data = json.loads(json_str)
-    # for i in range(20):
+    
+    #for i in range(2):
     for i in range(len(json_data)): # print(i)
         df_entry *= 0
         m = str(json_data[i]["m"])
@@ -250,17 +253,10 @@ def feed_data(dataJJ, p_abs, d_st = False, p_exp=False, pand=False, p_col = Fals
         for key in json_data[i]:
             if key == "m": pass            
             else: 
-                key_wz = key if p_abs else (int(key))  #str(int(key)) FRFLO - int // FRALL str!
+                key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 try: #filling of key - experimental or COMP 
                     ds_comp = col_df.loc[key_wz]
-                    if p_exp == True:  #fp key - 0-102   
-                        co = str(ds_comp['FP'])
-                        if co == 'nan':  col_key = 102
-                        else: 
-                            col_key = int(ds_comp['FP'])
-                            if col_key>101: col_key = 101
-                            if col_key<0: col_key = 0
-                    else: col_key = key_wz      
+                    col_key = str(ds_comp.name)      
                     # df_entry.loc[col_key]
                     df_entry[col_key] =  np.float32(json_data[i][key])
                 except: 
@@ -269,11 +265,38 @@ def feed_data(dataJJ, p_abs, d_st = False, p_exp=False, pand=False, p_col = Fals
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
     print("Counter of comp. not included :"); print(ccount) # print(len(ccount))
+    if p_col:  
+        json_df["FP"] = dataTest_label
+    if pand:  return json_df
+    else:     
+        if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
+        else:     return json_df.iloc[:,3:].as_matrix().tolist() 
+        
+        
+dstf = 0        
+def get_tests(p_abs=True): 
+    global dst, dstf 
+    if dstf != 0: 
+        return True
+    else:
+        dstf = 1
+        #d_st = display status
+        dst = feed_data(dataJJ="", p_abs=p_abs , d_st=True, pand=True, p_col=True) 
 
-    if p_col: return json_df.as_matrix().tolist(), dataTest_label
-    else: 
-        if pand:  return json_df  
-        else:     return json_df.as_matrix().tolist()  
+        
+dscf = 0        
+def get_columns(p_abs=True): 
+    global dsc, dscf 
+    if dscf != 0: 
+        return True
+    else:
+        dscf = 1
+        #d_st = display status
+        dsc = feed_data(dataJJ="", p_abs=p_abs , d_st=True, pand=True, p_col=True) 
+
+
+
+
 
 def testsJ(excel):
     print("tests JSON")    

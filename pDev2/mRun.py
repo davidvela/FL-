@@ -141,12 +141,12 @@ def restore_model(sess):
 def get_data_test( desc ): 
     if desc == "FRFLO": 
         json_str = '''[
-            { "m":"1", "c1122" :1 },
-            { "m":"2", "c884" : 1 },
-            { "m":"3", "c825" : 1 },
-            { "m":"4", "c1122" :0.5 , "c825" :0.5 },
-            { "m":"10", "c3" :0.5 , "c4" :0.5 }] '''
-        tmpLab = [121, 110, 75, 90, 80]
+            { "m":"1", "100023" : 1 },
+            { "m":"2", "100025" : 1 },
+            { "m":"3", "100034" : 1 },
+            { "m":"4", "100023" :0.5 , "100034" :0.5 },
+            { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
+        tmpLab = [73, 75, 46, 60, 75]
     elif desc == "FRALL": #most used 
         json_str =  '''[
             { "m":"1", "c1122" : 1 },
@@ -257,15 +257,17 @@ def tests(url_test = 'url', p_col=False):
             tmpLab = tmpLab.loc[:,'fp']
             abstcc = False
         else:                   # get data test JSON = url
-            json_str, tmpLab = get_data_test("FRALL")
+            json_str, tmpLab = get_data_test(md.DESC)
             json_data = json.loads(json_str)
-            abstcc = True
+            abstcc = False
             md.DESC =  'matnrList...'
         
         dataTest['data']  = md.feed_data(json_data, p_abs=abstcc , d_st=True)
         
         dataTest['label'] = []
         [dataTest['label'].append( md.cc(x) ) for x in tmpLab ]
+   
+   
     # Predict data 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -321,8 +323,8 @@ def mainRun():
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
     # DATA READ 
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout = md.getnn()
     print(len(md.dst))
@@ -336,8 +338,8 @@ def mainRun():
     # epochs     = 10
     clean_traina()
     # train(epochs, disp, batch_size)
-    evaluate( )
-    url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
+    # evaluate( )
+    url_test = md.LOGDAT + "FREXP1/" ; url_test = "url"
     tests(url_test, p_col=False  )
     vis_chart( )
     print("___The end!")
