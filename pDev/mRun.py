@@ -5,7 +5,6 @@ import pandas as pd
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-
 import requests
 import json
 import sys
@@ -15,7 +14,6 @@ from types import *
 from collections import Counter
 from datetime import datetime
 import utils_data as md
-
 
 def get_nns(): 
     #nns =  str(ninp)+'*'+str(h[0])+'*'+str(h[1])+'*'+str(nout)
@@ -47,37 +45,9 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
     f.write(line);  f.close()
     print("___Log recorded")    
 
-
-# READ DATA -------------------------------------------------
-print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-md.DESC       = "FRFLO"
-md.spn        = 5000  
-md.dType      = "C1" #C1, C2, C4
-# ninp, nout  = md.mainRead()
-# md.DESC     = "FREXP"
-ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
-print("___Data Read!")
-
-epochs   = 100 #100
-lr       = 0.001 #0.0001
-h      = [100 , 100]
-# h      = [40 , 10]
-# h        = [200, 100, 40]
-
-# md.DESC    = "FRFLO"
-final = "_" #FF or _
-md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
-model_path = md.MODEL_DIR + "model.ckpt" 
-
-
-disp       = 5
-batch_size = 128
-
-
 # NETWORK-----------------------------------------------------
-print( get_nns() )
-x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
-y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
+# x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
+# y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
 def fc(inp, nodes, kp, is_train):
     # h = tf.layers.dense( x, h[0], activation=tf.nn.relu,  name )
     h = tf.layers.dense( inp, nodes, use_bias=False, activation=None )
@@ -139,7 +109,9 @@ def build_network1( ):                  # Simple NN - 2layers - matmul
 
     return out, accuracy, softmaxT, biases, weights
 def build_network3():
-    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver
+    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
+    x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
+    y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
     prediction, accuracy, softmaxT = build_network2()
     with tf.name_scope("xent"): #loss
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
@@ -149,7 +121,6 @@ def build_network3():
     summ = tf.summary.merge_all()
     saver= tf.train.Saver()
 
- 
 def old():
     # prediction, accuracy, softmaxT, biases, weights = build_network1()
     prediction, accuracy, softmaxT = build_network2()
@@ -266,6 +237,7 @@ def evaluate( ):
                                                     md.dc( predv.tolist()[i], np.max(predv[i]))  ))
     gt3, gtM = md.check_perf_CN(softv, md.dataE, False) #predv
     logr(  it=0, typ='EV', AC=ev_ac,DS=md.DESC, num=len(md.dataE["label"]), AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
+    return predv.tolist()
 def tests(url_test = 'url', p_col=False):  
     print("_____TESTS...")    
     
@@ -308,12 +280,15 @@ def tests(url_test = 'url', p_col=False):
     gt3, gtM = md.check_perf_CN(sf, dataTest, False)
     logr( it=0, typ='TS', DS=md.DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
 
-    outfile = md.LOGDAT + 'export2' 
-    np.savetxt(outfile + '.csv', sf[1], delimiter=',')
-    np.savetxt(outfile + 'PRO.csv', sf[0], delimiter=',')
+    # outfile = md.LOGDAT + 'export2' 
+    # np.savetxt(outfile + '.csv', sf[1], delimiter=',')
+    # np.savetxt(outfile + 'PRO.csv', sf[0], delimiter=',')
+    return sf
 
-train_accuracies, test_accuracies = [], []
-
+def clean_traina():
+    global train_accuracies, test_accuracies
+    train_accuracies, test_accuracies = [], []
+    
 def vis_chart( ):
     fig, ax = plt.subplots()
     plt.plot(train_accuracies, label='Train', alpha=0.5)
@@ -324,14 +299,37 @@ def vis_chart( ):
     # plt.show()
     return
 
+
+# READ DATA -------------------------------------------------
+print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
+
+md.DESC       = "FRFLO" # "FREXP"
+md.spn        = 5000  
+md.dType      = "C1" #C1, C2, C4
+
+ninp, nout    = md.mainRead()
+# ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+
+epochs   = 5 #100
+lr       = 0.001 #0.0001
+h      = [100 , 100]
+# h      = [40 , 10]
+# h        = [200, 100, 40]
+
+disp       = 5
+batch_size = 128
+final = "_" #FF or _
+md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
+model_path = md.MODEL_DIR + "model.ckpt" 
+
 def mainRun(): 
     build_network3()
-
     print(model_path)
+    print( get_nns() )
     # epochs     = 10
-
-    # train(epochs, disp, batch_size)
-    # evaluate( )
+    clean_traina()
+    train(epochs, disp, batch_size)
+    evaluate( )
     url_test = md.LOGDAT + "FREXP1/" ;
     tests(url_test, p_col=False  )
     vis_chart( )
