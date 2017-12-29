@@ -25,7 +25,7 @@ def mainRun():
         mr.build_network3()
         print(mr.model_path)    
 
-        # mr.evaluate( )
+        mr.evaluate( )
         url_test = md.LOGDAT + "FREXP1/" ;
         mr.tests(url_test, p_col=False  )
 
