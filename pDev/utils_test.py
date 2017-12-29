@@ -1,45 +1,41 @@
 # load the mRun and execute it with different models ... 
 # save the results and give a estimation comparing all the model resutls'
-
-import mRun as rm
+from datetime import datetime
+import mRun as mr
 import utils_data as md
 
-# epochs   = 5 #100
-# lr       = 0.001 #0.0001
-# h      = [100 , 100]
 executions = [
-    {   'dType':'C2',  'DESC':'FRFLO', 'model': "slr_1E-03_NN1814x100x100x102_ep100_", "spn": 5000, "predEv": [], "predts": []  },
-    {   'dType':'C4',  'DESC':'FRFLO', 'model': "slr_1E-03_NN1814x100x100x102_ep100_", "spn": 5000, "predEv": [], "predts": []  },
-    {   'dType':'C1',  'DESC':'FRFLO', 'model': "slr_1E-03_NN1814x100x100x102_ep100_", "spn": 5000, "predEv": [], "predts": []  },
+{ 'dt':'C2', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+{ 'dt':'C4', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+# { 'dt':'C1', 'de':'FRFLO', "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
 ]
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-
+    final = "_"
     for ex in executions:
-        md.DESC       = "FRFLO"
-        md.spn        = 5000  
-        md.dType      = "C1" #C1, C2, C4
-        md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
+        md.DESC       = ex["de"]
+        md.spn        = ex["spn"]  
+        md.dType      = ex["dt"]
+        epochs        = ex["e"]
 
-        print("___Data Read!")
-        mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.ninp, mr.nout    = md.mainRead()
+        md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(epochs, final=final) +"/" 
+        mr.model_path = md.MODEL_DIR + "model.ckpt" 
+        mr.build_network3()
+        print(mr.model_path)    
 
-        build_network3()
-        print(model_path)    
-
-        mr.evaluate( )
-        mr.url_test = md.LOGDAT + "FREXP1/" ;
+        # mr.evaluate( )
+        url_test = md.LOGDAT + "FREXP1/" ;
         mr.tests(url_test, p_col=False  )
 
-    print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
+    print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
 
 if __name__ == '__main__':
     mainRun()
 
 
-def bk
+def bk():
     for i in range(20):
         print("RealVal: {}  - PP value: {}".format( md.dc( md.dataE['label'][i]), 
                                                     md.dc( predv.tolist()[i], np.max(predv[i]))  ))

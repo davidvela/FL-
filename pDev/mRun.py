@@ -46,8 +46,6 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
     print("___Log recorded")    
 
 # NETWORK-----------------------------------------------------
-# x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
-# y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
 def fc(inp, nodes, kp, is_train):
     # h = tf.layers.dense( x, h[0], activation=tf.nn.relu,  name )
     h = tf.layers.dense( inp, nodes, use_bias=False, activation=None )
@@ -109,6 +107,9 @@ def build_network1( ):                  # Simple NN - 2layers - matmul
 
     return out, accuracy, softmaxT, biases, weights
 def build_network3():
+    tf.reset_default_graph()
+
+    print("build network")
     global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
     x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
     y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
@@ -137,7 +138,6 @@ def restore_model(sess):
     saver= tf.train.Saver() 
     print("Model restored from file: %s" % model_path)
     saver.restore(sess, model_path)
-print("___Network created")
 def get_data_test( desc ): 
     if desc == "FRFLO": 
         json_str = '''[
@@ -300,29 +300,29 @@ def vis_chart( ):
     return
 
 
-# READ DATA -------------------------------------------------
-print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-
 md.DESC       = "FRFLO" # "FREXP"
 md.spn        = 5000  
 md.dType      = "C1" #C1, C2, C4
-
-ninp, nout    = md.mainRead()
-# ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+ninp, nout    = 10, 10
 
 epochs   = 5 #100
 lr       = 0.001 #0.0001
-h      = [100 , 100]
-# h      = [40 , 10]
-# h        = [200, 100, 40]
+h      = [100 , 100]   #[40 , 10]   [200, 100, 40]
 
 disp       = 5
 batch_size = 128
 final = "_" #FF or _
-md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
-model_path = md.MODEL_DIR + "model.ckpt" 
 
 def mainRun(): 
+    global ninp, nout, model_path
+    print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
+
+    ninp, nout    = md.mainRead()
+    # ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
+    model_path = md.MODEL_DIR + "model.ckpt" 
+
+
     build_network3()
     print(model_path)
     print( get_nns() )
