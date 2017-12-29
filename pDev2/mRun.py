@@ -169,7 +169,7 @@ def train(it = 100, disp=50, batch_size = 128):
     display_step =  disp 
 
     dataTest = {'label' : [] , 'data' :  [] };
-    dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
+    # dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
     # md.dataT['data'].append(dataTest['data']) ;     md.dataT['label'].append(dataTest['label']) 
     
     print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
@@ -197,16 +197,18 @@ def train(it = 100, disp=50, batch_size = 128):
                     tr_ac = str(train_accuracy)[:5]  
                     print('Epoch: {} batch: {} / {} - %Speed(it/disp_step): {} - tr_ac {}' .format(i, ii, total_batch, rp_s, tr_ac ))
                     # writer.add_summary(s, i)
-            ev_ac = str(sess.run(accuracy, feed_dict={x: md.dataE['data'], y: md.dataE['label']}))[:5] 
+            test_accuracy = sess.run( accuracy, feed_dict={ x: md.dst.iloc[:md.spn, 3:],  y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist()  })
+            ev_ac = str(test_accuracy)[:5]  
             print("E Ac:", ev_ac)
             
-            sess.run([optimizer], feed_dict={x: dataTest['data'], y: dataTest['label']})
-            tr_ac = str(sess.run(accuracy, feed_dict={x: dataTest['data'], y: dataTest['label']}))[:5] 
-            print("Cm Ac:", tr_ac)
+            # sess.run([optimizer], feed_dict={x: dataTest['data'], y: dataTest['label']})
+            # tr_ac = str(sess.run(accuracy, feed_dict={x: dataTest['data'], y: dataTest['label']}))[:5] 
+            # print("Cm Ac:", tr_ac)
             
-            tr_ac = str(sess.run(accuracy, feed_dict={x: md.dataT['data'], y: md.dataT['label']}))[:5] 
+            train_accuracy = sess.run( accuracy, feed_dict={ x: md.dst.iloc[md.spn:, 3:],  y: md.dst.loc[md.spn:,'FP_P'].as_matrix().tolist()   })
+            tr_ac = str( train_accuracy )[:5] 
             print("T Ac:", tr_ac)
-            
+
             train_accuracies.append(tr_ac)
             test_accuracies.append(ev_ac)
 
@@ -214,8 +216,8 @@ def train(it = 100, disp=50, batch_size = 128):
         print("Model saved in file: %s" % save_path) 
     print("Optimization Finished!")
 
-    logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dataT["label"]), AC3=0, AC10=0, desc=md.des(), startTime=startTime )
-    logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=len(md.dataE["label"]), AC3=0, AC10=0, desc=md.des() )
+    logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
+    logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
 def evaluate( ): 
     print("_____EVALUATION...")
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -224,20 +226,22 @@ def evaluate( ):
         sess.run(tf.global_variables_initializer())
         restore_model(sess)
         # test the model
-        tr_ac = str(sess.run( accuracy, feed_dict={ x: md.dataT['data'],  y: md.dataT['label']}) )[:5]  
-        ev_ac = str(sess.run( accuracy, feed_dict={ x: md.dataE['data'],  y: md.dataE['label'][:md.spn]   }))[:5] 
+        tr_ac = str(sess.run( accuracy, feed_dict={ x: md.dst.iloc[md.spn:, 3:],  y: md.dst.loc[md.spn:,'FP_P'].as_matrix().tolist()    }) )[:5]  
+        ev_ac = str(sess.run( accuracy, feed_dict={ x: md.dst.iloc[:md.spn, 3:],  y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist()  }))[:5] 
         print("Training   Accuracy:", tr_ac )
         print("Evaluation Accuracy:", ev_ac )
         # xtp1.append(dataTest['data'][i]);    ytp1.append(dataTest['label'][i])
-        predv, softv = sess.run([prediction, softmaxT], feed_dict={x: md.dataE['data']  }) # , y: md.dataE['label'] 
+        predv, softv = sess.run([prediction, softmaxT], feed_dict={x: md.dst.iloc[:md.spn, 3:]  }) # , y: md.dataE['label'] 
         # maxa = sess.run([prediction], feed_dict={y: predv })
+        
     print("Preview the first predictions:")
     for i in range(20):
-        print("RealVal: {}  - PP value: {}".format( md.dc( md.dataE['label'][i]), 
+        print("RealVal: {}  - PP value: {}".format( md.dc( md.dst.loc[:md.spn-1,'FP_P'][i])   , 
                                                     md.dc( predv.tolist()[i], np.max(predv[i]))  ))
-    gt3, gtM = md.check_perf_CN(softv, md.dataE, False) #predv
-    logr(  it=0, typ='EV', AC=ev_ac,DS=md.DESC, num=len(md.dataE["label"]), AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
+    gt3, gtM = md.check_perf_CN(softv, md.dst.loc[:md.spn-1,'FP_P'], False)
+    logr(  it=epochs, typ='EV', AC=ev_ac,DS=md.DESC, num=md.spn, AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
     return predv.tolist()
+
 def tests(url_test = 'url', p_col=False):  
     print("_____TESTS...")    
     
@@ -277,7 +281,7 @@ def tests(url_test = 'url', p_col=False):
         print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc( dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]   ))
 
     # return
-    gt3, gtM = md.check_perf_CN(sf, dataTest, False)
+    gt3, gtM = md.check_perf_CN(sf, dataTest["label"], False)
     logr( it=0, typ='TS', DS=md.DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
 
     # outfile = md.LOGDAT + 'export2' 
@@ -300,24 +304,27 @@ def vis_chart( ):
     return
 
 
-md.DESC       = "FRFLO" # "FREXP"
-md.spn        = 5000  
-md.dType      = "C1" #C1, C2, C4
-ninp, nout    = 10, 10
-
-epochs   = 5 #100
-lr       = 0.001 #0.0001
-h      = [100 , 100]   #[40 , 10]   [200, 100, 40]
-
-disp       = 5
-batch_size = 128
-final = "_" #FF or _
+md.DESC      = "FRFLO" # "FREXP"
+md.spn       = 5000  
+md.dType     = "C1" #C1, C2, C4
+epochs       = 5 #100
+lr           = 0.001 #0.0001
+h            = [100 , 100]   #[40 , 10]   [200, 100, 40]
+ninp, nout   = 10, 10
+disp         = 5
+batch_size   = 128
+final        = "_" #FF or _
 
 def mainRun(): 
     global ninp, nout, model_path
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-
-    ninp, nout    = md.mainRead()
+    # DATA READ 
+    # ninp, nout    = md.mainRead()
+    ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
+    md.mainRead3(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    md.normalize()
+    ninp, nout = md.getnn()
+    print(len(md.dst))
     # ninp, nout  = md.mainRead2(md.ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
@@ -328,9 +335,9 @@ def mainRun():
     print( get_nns() )
     # epochs     = 10
     clean_traina()
-    train(epochs, disp, batch_size)
+    # train(epochs, disp, batch_size)
     evaluate( )
-    url_test = md.LOGDAT + "FREXP1/" ;
+    url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
     tests(url_test, p_col=False  )
     vis_chart( )
     print("___The end!")

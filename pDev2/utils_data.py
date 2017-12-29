@@ -102,6 +102,7 @@ def dc(df, val = 1 ):
     # dst = dst.fillna(0)
     # dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc(x)))  
     
+def normalize():     dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
 
 def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuffle = True): 
     global dataT; global dataE;
@@ -130,13 +131,14 @@ def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuf
         
 def convert_2List(dst): return {'label' : dst["label"].as_matrix().tolist(), 'data' : dst["data"].as_matrix().tolist()}
 
+
 def get_batches(batch_size):
-    n_batches = len(dataT["label"])//batch_size
+    n_batches = int(len( dst.loc[spn:]  ) // batch_size)
+    print(n_batches*batch_size)
     # x,y = dataT["data"][:n_batches*batch_size], dataT["label"][:n_batches*batch_size]
-    
-    for ii in range(0, len(dataT["data"][:n_batches*batch_size] ), batch_size ):
+    for ii in range(0, len( dst.loc[spn:spn+n_batches*batch_size]) , batch_size ):
         #convert to list! 
-        yield dataT["data"][ii:ii+batch_size], dataT["label"][ii:ii+batch_size]    
+        yield dst.iloc[spn+ii: spn+ii+batch_size, 3:].as_matrix().tolist(), dst.loc[spn+ii: spn+ii+batch_size-1, 'FP_P' ].as_matrix().tolist() 
 
 def mainRead(filt=["", 0]):             
     global ninp, nout, dataT, dataE; 
@@ -177,18 +179,51 @@ def mainRead2(path, part, batch_size):  # read by partitions!
     dataE= convert_2List(dataE)
     return ninp, nout
 
+def mainRead3( path, part, batch_size , all = True, shuffle = True):  
+    # read by partitions!   
+    global  spn, dst;
+    start = time.time()
+    if all:  dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" )
+    else:     
+        columns = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" ,skiprows=0, nrows=1)
+        dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" ,skiprows=part*batch_size+1, 
+                           nrows=batch_size, names = columns.columns)
+    
+    dst = dst.fillna(0)
+    if shuffle: dst = dst.sample(frac=1).reset_index(drop=True) 
+    dst.insert(2, 'FP_P', dst['FP'] )  
+    elapsed_time = float(time.time() - start)
+    print("data read - {} - time:{}" .format(len(dst), elapsed_time ))
+
+    # #dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc( x )))  
+    # if batch_size > spn: spn = -1
+    # dst = dst.sample(frac=1).reset_index(drop=True) 
+    # dataT  = {'label' : dst.loc[spn:,'FP_P'] , 'data' :  dst.iloc[spn:, 3:] }
+    # dataE  = {'label' : dst.loc[:spn-1,'FP_P'] , 'data' :  dst.iloc[:spn, 3:] }
+    #print("data read - lenTrain={}-{} & lenEv={}-{} time:{}" .format(len(dataT["data"]), 
+    #    len(dataT["label"]),len(dataE["data"]),len(dataE["label"]), elapsed_time ))
+    # dataT= convert_2List(dataT)
+    # dataE= convert_2List(dataE)
+ 
+def getnn():
+    ninp = len(dst.columns) - 3 
+    if   dType == 'C2':  nout = 2;   
+    if   dType == 'C4':  nout = 4;   
+    elif dType == 'C1':  nout = 102;
+    return ninp, nout
+
 def check_perf_CN(predv, dataEv, sk_ev=False ):
     gt3 = 0; gtM = 0; 
     # predvList = predv.tolist()
     # assert(len(predv) == len(dataEv['label']))
-    print("denormalization all Evaluation : {} = {}" .format(len(predv[1]), len(dataEv["label"])))
+    print("denormalization all Evaluation : {} = {}" .format(len(predv[1]), len(dataEv)))
     #for i in range(100):
-    for i in range(len(dataEv["label"])):
+    for i in range(len(dataEv)):
         if (i % 1000==0): print(str(i)) #, end="__") 
         try:
             # pred_v = dc( predv.tolist()[i], np.max(predv[i]))
             pred_v = predv[1][i][0]
-            data_v = dataEv['label'][i] if sk_ev  else dc( dataEv['label'][i])
+            data_v = dataEv[i] if sk_ev  else dc( dataEv[i])
             if   dType == 'C4' and pred_v != data_v:  gt3=gtM=gtM+1
             elif dType == 'C2' and pred_v != data_v:  gt3=gtM=gtM+1
             elif dType == 'C1':
