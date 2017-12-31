@@ -102,7 +102,10 @@ def dc(df, val = 1 ):
     # dst = dst.fillna(0)
     # dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc(x)))  
     
-def normalize():     dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
+def normalize():     
+    dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
+    if flag_dsp : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
+    if flag_dsc : dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
 
 def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuffle = True): 
     global dataT; global dataE;
@@ -219,9 +222,6 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
     indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
  
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
-    
-    
-
     col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
     col_df = col_df.fillna(0)
     print("input-no={}".format( len(col_df )))
@@ -250,13 +250,14 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
         df_entry *= 0
         m = str(json_data[i]["m"])
         df_entry.name = m
+        df_entry["M"] = m
         for key in json_data[i]:
             if key == "m": pass            
             else: 
                 key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 try: #filling of key - experimental or COMP 
                     ds_comp = col_df.loc[key_wz]
-                    col_key = str(ds_comp.name)      
+                    col_key = str(ds_comp.name)
                     # df_entry.loc[col_key]
                     df_entry[col_key] =  np.float32(json_data[i][key])
                 except: 
@@ -265,36 +266,66 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
     print("Counter of comp. not included :"); print(ccount) # print(len(ccount))
+ 
+        
     if p_col:  
         json_df["FP"] = dataTest_label
+    
     if pand:  return json_df
     else:     
         if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
         else:     return json_df.iloc[:,3:].as_matrix().tolist() 
         
         
-dstf = 0        
-def get_tests(p_abs=True): 
-    global dst, dstf 
-    if dstf != 0: 
+flag_dsp = False        
+def get_tests(url_test='url', force=True): 
+    global dsp, flag_dsp 
+    
+    if flag_dsp and force: 
         return True
     else:
-        dstf = 1
+        flag_dsp = True
+        if url_test != 'url':   # test  file 
+            #DESC     = "FREXP1_X"
+            json_data = url_test + "data_jsonX.txt"
+            tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
+            tmpLab = tmpLab.loc[:,'fp']
+            abstcc = False
+        else:                   # get data test JSON = url
+            json_str, tmpLab = get_data_test("FRFLO")
+            json_data = json.loads(json_str)
+            abstcc = False
+            #DESC =  'matnrList...'
         #d_st = display status
-        dst = feed_data(dataJJ="", p_abs=p_abs , d_st=True, pand=True, p_col=True) 
-
+        print(json_data)
+        dsp = feed_data(json_data, p_abs=abstcc ,pand=True, d_st=True)
+        dsp["FP"] = tmpLab
         
-dscf = 0        
-def get_columns(p_abs=True): 
-    global dsc, dscf 
-    if dscf != 0: 
+flag_dsc = False       
+def get_columns(p_abs=True, force=True): 
+    global dsc, flag_dsc 
+    if flag_dsc and force: 
         return True
     else:
-        dscf = 1
+        flag_dsc = True
         #d_st = display status
         dsc = feed_data(dataJJ="", p_abs=p_abs , d_st=True, pand=True, p_col=True) 
 
-
+#         indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
+#         col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
+#         col_df = col_df.fillna(0)
+#         print("input-no={}".format( len(col_df )))
+#         indx = dst.index
+        
+#         json_df  = pd.DataFrame(columns=dst.columns); df_entry = pd.Series(index=dst.columns)
+#         df_entry = df_entry.fillna(0) 
+#         for i in range(len(col_df)): 
+#             df_entry *= 0
+#             df_entry["M"] = i #col_df.iloc[i].name
+#             df_entry["FP"] = col_df.iloc[i]["fp"]
+#             key = col_df.iloc[i].name
+#             key_wz = key if p_abs else (int(key))
+#             df_entry[] = 1
 
 
 

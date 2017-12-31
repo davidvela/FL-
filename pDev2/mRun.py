@@ -340,6 +340,8 @@ def mainRun():
     # train(epochs, disp, batch_size)
     # evaluate( )
     url_test = md.LOGDAT + "FREXP1/" ; url_test = "url"
+    
+    
     tests(url_test, p_col=False  )
     vis_chart( )
     print("___The end!")
