@@ -248,24 +248,22 @@ def tests(url_test = 'url', p_col=False):
     # Load test data 
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     if p_col:                   # test columns 
-        dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
+        get_columns(p_abs = True)  #md.dsc
     else: 
         if url_test != 'url':   # test  file 
             md.DESC     = "FREXP1_X"
             json_data = url_test + "data_jsonX.txt"
             tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
             tmpLab = tmpLab.loc[:,'fp']
-            abstcc = False
         else:                   # get data test JSON = url
             json_str, tmpLab = get_data_test(md.DESC)
             json_data = json.loads(json_str)
-            abstcc = False
             md.DESC =  'matnrList...'
-        
-        dataTest['data']  = md.feed_data(json_data, p_abs=abstcc , d_st=True)
-        
-        dataTest['label'] = []
-        [dataTest['label'].append( md.cc(x) ) for x in tmpLab ]
+        get_tests(url_test, force) #dsp
+
+        # dataTest['data']  = md.feed_data(json_data, p_abs=abstcc , d_st=True) 
+        # dataTest['label'] = []
+        # [dataTest['label'].append( md.cc(x) ) for x in tmpLab ]
    
    
     # Predict data 

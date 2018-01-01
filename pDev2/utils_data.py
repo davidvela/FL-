@@ -28,11 +28,11 @@ DL         = "/datal.csv"
 filter     = ["", 0]
 type_sep   = False
 
-DESC       = "FRFLO"
+DESC       = "FRFLO" ; pp_abs = False
 spn        = 5000  
 dType      = "C4" #C1, C2, C4
 
-# DESC       = "FRALL1"
+# DESC       = "FRALL1"; pp_abs = True
 # spn        = 10000  #5000 -1 = all for training 
 
 #---------------------------------------------------------------------
@@ -218,9 +218,10 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
     return gt3, gtM 
 
+
 def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
-    indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
- 
+    #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
+    index_col = 2 #name - num, abs = cc
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
     col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
     col_df = col_df.fillna(0)
@@ -254,11 +255,14 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
         for key in json_data[i]:
             if key == "m": pass            
             else: 
-                key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
+                #key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
+                key_wz = int(key)
                 try: #filling of key - experimental or COMP 
+                    #print(key_wz); print(type(key_wz))
                     ds_comp = col_df.loc[key_wz]
-                    col_key = str(ds_comp.name)
-                    # df_entry.loc[col_key]
+                    #print(ds_comp)
+                    col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) 
+                    # df_entr#y.loc[col_key]
                     df_entry[col_key] =  np.float32(json_data[i][key])
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
@@ -275,59 +279,82 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
     else:     
         if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
         else:     return json_df.iloc[:,3:].as_matrix().tolist() 
+# TEST -> ALWAYS WITH 10023 ... cx -> conditional 
+def get_data_test( desc ): 
+    if desc == 1: 
+        json_str = '''[
+            { "m":"PBV10476AS", "178583" :0.74598 , "106104" :0.1 , "182789" :0.04 , "130172" :0.035 , "179661" :0.035 , "164421" :0.018 , "600040" :0.0108 , "116165" :0.008 , "164419" :0.0018 , "103396" :0.001 , "130217" :0.001 , "131460" :0.001 , "690750" :0.0007 , "611089" :0.0006 , "130058" :0.0004 , "130354" :0.0002 , "131101" :0.0002 , "131435" :0.00012 , "131136" :0.0001 , "131315" :0.0001 },   
+            { "m":"1", "100023" : 1 },
+            { "m":"2", "100025" : 1 },
+            { "m":"3", "100034" : 1 },
+            { "m":"4", "100023" :0.5 , "100034" :0.5 },
+            { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
+        tmpLab = [50, 73, 75, 46, 60, 75]
         
+    elif desc == 2: #most used 
+        json_str = '''[
+            { "m":"PBV10476AS", "178583" :0.74598 , "106104" :0.1 , "182789" :0.04 , "130172" :0.035 , "179661" :0.035 , "164421" :0.018 , "600040" :0.0108 , "116165" :0.008 , "164419" :0.0018 , "103396" :0.001 , "130217" :0.001 , "131460" :0.001 , "690750" :0.0007 , "611089" :0.0006 , "130058" :0.0004 , "130354" :0.0002 , "131101" :0.0002 , "131435" :0.00012 , "131136" :0.0001 , "131315" :0.0001 },
+            { "m":"1", "100023" : 1 },
+            { "m":"2", "100025" : 1 },
+            { "m":"3", "100034" : 1 },
+            { "m":"4", "100023" :0.5 , "100034" :0.5 },
+            { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
+        tmpLab = [50, 73, 75, 46, 60, 75]
+
+    elif desc == 3 : 
+        json_str =  '''[
+            { "m":"8989", "100023" :0.5 },
+            { "m":"8988", "100023" :0.5 , "100025" :0.5 }] '''
+        tmpLab = [73, 75]
+    return json_str, tmpLab
+
         
-flag_dsp = False        
-def get_tests(url_test='url', force=True): 
+flag_dsp = True        
+def get_tests(url_test='url', force=False): 
     global dsp, flag_dsp 
     
-    if flag_dsp and force: 
-        return True
-    else:
-        flag_dsp = True
+    if flag_dsp or force: 
+        flag_dsp = False
         if url_test != 'url':   # test  file 
             #DESC     = "FREXP1_X"
             json_data = url_test + "data_jsonX.txt"
             tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
-            tmpLab = tmpLab.loc[:,'fp']
-            abstcc = False
+            tmpLab = tmpLab.loc[:,'fp'].tolist()
         else:                   # get data test JSON = url
-            json_str, tmpLab = get_data_test("FRFLO")
+            json_str, tmpLab = get_data_test(1) 
             json_data = json.loads(json_str)
-            abstcc = False
             #DESC =  'matnrList...'
         #d_st = display status
-        print(json_data)
-        dsp = feed_data(json_data, p_abs=abstcc ,pand=True, d_st=True)
+        dsp = feed_data(json_data ,pand=True, d_st=True)
         dsp["FP"] = tmpLab
-        
-flag_dsc = False       
-def get_columns(p_abs=True, force=True): 
-    global dsc, flag_dsc 
-    if flag_dsc and force: 
+    else:    
         return True
-    else:
-        flag_dsc = True
+    
+flag_dsc = True       
+def get_columns(force=False): 
+    global dsc, flag_dsc 
+    if flag_dsc or force: 
+        flag_dsc = False
         #d_st = display status
-        dsc = feed_data(dataJJ="", p_abs=p_abs , d_st=True, pand=True, p_col=True) 
-
-#         indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
-#         col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
-#         col_df = col_df.fillna(0)
-#         print("input-no={}".format( len(col_df )))
-#         indx = dst.index
+        dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
+    else:    
+        return True
+    # indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D
+    # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
+    # col_df = col_df.fillna(0)
+    # print("input-no={}".format( len(col_df )))
+    # indx = dst.index
         
-#         json_df  = pd.DataFrame(columns=dst.columns); df_entry = pd.Series(index=dst.columns)
-#         df_entry = df_entry.fillna(0) 
-#         for i in range(len(col_df)): 
-#             df_entry *= 0
-#             df_entry["M"] = i #col_df.iloc[i].name
-#             df_entry["FP"] = col_df.iloc[i]["fp"]
-#             key = col_df.iloc[i].name
-#             key_wz = key if p_abs else (int(key))
-#             df_entry[] = 1
-
-
+    # json_df  = pd.DataFrame(columns=dst.columns); df_entry = pd.Series(index=dst.columns)
+    # df_entry = df_entry.fillna(0) 
+    # for i in range(len(col_df)): 
+        # df_entry *= 0
+        # df_entry["M"] = i #col_df.iloc[i].name
+        # df_entry["FP"] = col_df.iloc[i]["fp"]
+        # key = col_df.iloc[i].name
+        # key_wz = key if p_abs else (int(key))
+        # df_entry[] = 1
+        
 
 def testsJ(excel):
     print("tests JSON")    
