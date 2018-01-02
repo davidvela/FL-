@@ -49,6 +49,9 @@ ninp   = 0
 dataT  = {'label' : [] , 'data' :  [] } #inmutables array are faster! 
 dataE  = {'label' : [] , 'data' :  [] }
 
+flag_dsp = True        
+flag_dsc = True 
+
 def des(): return DESC+'_'+dType+"_filt:"+  filter[0]+str(filter[1])
 def c2(df, rv=1):
     if rv == 1:
@@ -104,8 +107,8 @@ def dc(df, val = 1 ):
     
 def normalize(opt = 1):     
     if opt == 0 or opt == 1: dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
-    if flag_dsp or opt == 0 or opt == 2 : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
-    if flag_dsc or opt == 0 or opt == 3: dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
+    if (not flag_dsp) or opt == 0 or opt == 2 : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
+    if (not flag_dsc) or opt == 0 or opt == 3: dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
 
 def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuffle = True): 
     global dataT; global dataE;
@@ -219,7 +222,7 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
     return gt3, gtM 
 
 
-def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
+def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
     index_col = 2 #name - num, abs = cc
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
@@ -309,7 +312,6 @@ def get_data_test( desc ):
     return json_str, tmpLab
 
         
-flag_dsp = True        
 def get_tests(url_test='url', force=False): 
     global dsp, flag_dsp 
     
@@ -332,8 +334,7 @@ def get_tests(url_test='url', force=False):
         dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
     else:    
         return True
-    
-flag_dsc = True       
+      
 def get_columns(force=False): 
     global dsc, flag_dsc 
     if flag_dsc or force: 
@@ -374,7 +375,7 @@ def testsJ(excel):
     else: json_data = ALL_DSJ
   
     start = time.time()
-    dataAll['data'] = feed_data(json_data, p_abs = True, pand=True, d_st=True,  p_exp=False);
+    dataAll['data'] = feed_data(json_data, pand=True, d_st=True,  p_exp=False);
     elapsed_time = float(time.time() - start)
     # TO DO: separate between training and evaluation! 
     

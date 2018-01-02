@@ -17,9 +17,9 @@ def mainRun():
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
     md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False        
-    url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
     md.get_tests(url_test, force)
     md.get_columns(force)
 

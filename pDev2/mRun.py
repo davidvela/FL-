@@ -169,10 +169,10 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     display_step =  disp 
 
     dataTest = {'label' : [] , 'data' :  [] };
-    # dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
-    # md.dataT['data'].append(dataTest['data']) ;     md.dataT['label'].append(dataTest['label']) 
     if compt: 
-        get_columns( )  #md.dsc
+        get_columns( )  #md.dsc or dataset? 
+        # dataTest['data'], dataTest['label']  = md.feed_data("",  d_st=True, p_col=True)   
+        # md.dataT['data'].append(dataTest['data']) ;     md.dataT['label'].append(dataTest['label']) 
         
     print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
     total_batch  = int(len(md.dataT['label']) / batch_size)   
@@ -203,9 +203,10 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
             ev_ac = str(test_accuracy)[:5]  
             print("E Ac:", ev_ac)
             
-            # sess.run([optimizer], feed_dict={x: dataTest['data'], y: dataTest['label']})
-            # tr_ac = str(sess.run(accuracy, feed_dict={x: dataTest['data'], y: dataTest['label']}))[:5] 
-            # print("Cm Ac:", tr_ac)
+            if compt: 
+                sess.run([optimizer], feed_dict={x: dataTest['data'], y: dataTest['label']})
+                tr_ac = str(sess.run(accuracy, feed_dict={x: dataTest['data'], y: dataTest['label']}))[:5] 
+                print("Cm Ac:", tr_ac)
             
             train_accuracy = sess.run( accuracy, feed_dict={ x: md.dst.iloc[md.spn:, 3:],  y: md.dst.loc[md.spn:,'FP_P'].as_matrix().tolist()   })
             tr_ac = str( train_accuracy )[:5] 
@@ -220,6 +221,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
 
     logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
     logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
+    dataTest = {'label' : [] , 'data' :  [] };
 def evaluate( ): 
     print("_____EVALUATION...")
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -250,22 +252,21 @@ def tests(url_test = 'url', p_col=False):
     # Load test data 
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     if p_col:                   # test columns 
-        get_columns( )  #md.dsc
-        dataTest['data'] = md.dsc.iloc[:, 3:]; dataTest['label'] = md.dsc.iloc[:, 'FP_P']
+        md.get_columns( )  #md.dsc
+        dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
     else: 
         if url_test != 'url':   # test  file 
-            md.DESC     = "FREXP1_X"
             json_data = url_test + "data_jsonX.txt"
             tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
             tmpLab = tmpLab.loc[:,'fp']
+            DESC   = "FREXP1_X"
         else:                   # get data test JSON = url
             json_str, tmpLab = get_data_test(md.DESC)
             json_data = json.loads(json_str)
-            md.DESC =  'matnrList...'
+            DESC =  'matnrList...'
         force = False
-        get_tests(url_test ) #dsp
-        dataTest['data'] = md.dsp.iloc[:, 3:]; dataTest['label'] = md.dsp.iloc[:, 'FP_P']   
-   
+        md.get_tests(url_test ) #dsp
+        dataTest['data']  = md.dsp.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsp.iloc[:, 2].as_matrix().tolist()     
     # Predict data 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -283,7 +284,7 @@ def tests(url_test = 'url', p_col=False):
 
     # return
     gt3, gtM = md.check_perf_CN(sf, dataTest["label"], False)
-    logr( it=0, typ='TS', DS=md.DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
+    logr( it=0, typ='TS', DS=DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
 
     # outfile = md.LOGDAT + 'export2' 
     # np.savetxt(outfile + '.csv', sf[1], delimiter=',')
@@ -326,13 +327,13 @@ def mainRun():
     md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout = md.getnn()
-    print(len(md.dst))
+    # print(len(md.dst))
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
     force = False        
-    url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
-    md.get_tests(url_test, force)
-    md.get_columns(force)
+    url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
+    # md.get_tests(url_test, force)
+    # md.get_columns(force)
 
     build_network3()
     print(model_path)
@@ -341,7 +342,6 @@ def mainRun():
     clean_traina()
     # train(epochs, disp, batch_size)
     # evaluate( )
-    url_test = md.LOGDAT + "FREXP1/" ; url_test = "url"
     
     tests(url_test, p_col=False  )
     vis_chart( )
