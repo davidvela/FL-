@@ -164,14 +164,16 @@ def get_data_test( desc ):
     return json_str, tmpLab
 
 # OPERATIONS-----------------------------------------------------
-def train(it = 100, disp=50, batch_size = 128): 
+def train(it = 100, disp=50, batch_size = 128, compt = False): 
     print("____TRAINING...")
     display_step =  disp 
 
     dataTest = {'label' : [] , 'data' :  [] };
     # dataTest['data'], dataTest['label']  = md.feed_data("", p_abs=False , d_st=True, p_col=True)   
     # md.dataT['data'].append(dataTest['data']) ;     md.dataT['label'].append(dataTest['label']) 
-    
+    if compt: 
+        get_columns( )  #md.dsc
+        
     print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
     total_batch  = int(len(md.dataT['label']) / batch_size)   
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -248,7 +250,8 @@ def tests(url_test = 'url', p_col=False):
     # Load test data 
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     if p_col:                   # test columns 
-        get_columns(p_abs = True)  #md.dsc
+        get_columns( )  #md.dsc
+        dataTest['data'] = md.dsc.iloc[:, 3:]; dataTest['label'] = md.dsc.iloc[:, 'FP_P']
     else: 
         if url_test != 'url':   # test  file 
             md.DESC     = "FREXP1_X"
@@ -259,12 +262,9 @@ def tests(url_test = 'url', p_col=False):
             json_str, tmpLab = get_data_test(md.DESC)
             json_data = json.loads(json_str)
             md.DESC =  'matnrList...'
-        get_tests(url_test, force) #dsp
-
-        # dataTest['data']  = md.feed_data(json_data, p_abs=abstcc , d_st=True) 
-        # dataTest['label'] = []
-        # [dataTest['label'].append( md.cc(x) ) for x in tmpLab ]
-   
+        force = False
+        get_tests(url_test ) #dsp
+        dataTest['data'] = md.dsp.iloc[:, 3:]; dataTest['label'] = md.dsp.iloc[:, 'FP_P']   
    
     # Predict data 
     with tf.Session() as sess:
@@ -288,6 +288,7 @@ def tests(url_test = 'url', p_col=False):
     # outfile = md.LOGDAT + 'export2' 
     # np.savetxt(outfile + '.csv', sf[1], delimiter=',')
     # np.savetxt(outfile + 'PRO.csv', sf[0], delimiter=',')
+    dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     return sf
 
 def clean_traina():
@@ -328,7 +329,10 @@ def mainRun():
     print(len(md.dst))
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
-
+    force = False        
+    url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
+    md.get_tests(url_test, force)
+    md.get_columns(force)
 
     build_network3()
     print(model_path)
@@ -338,7 +342,6 @@ def mainRun():
     # train(epochs, disp, batch_size)
     # evaluate( )
     url_test = md.LOGDAT + "FREXP1/" ; url_test = "url"
-    
     
     tests(url_test, p_col=False  )
     vis_chart( )

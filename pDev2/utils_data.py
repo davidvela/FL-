@@ -102,10 +102,10 @@ def dc(df, val = 1 ):
     # dst = dst.fillna(0)
     # dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc(x)))  
     
-def normalize():     
-    dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
-    if flag_dsp : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
-    if flag_dsc : dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
+def normalize(opt = 1):     
+    if opt == 0 or opt == 1: dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
+    if flag_dsp or opt == 0 or opt == 2 : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
+    if flag_dsc or opt == 0 or opt == 3: dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
 
 def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuffle = True): 
     global dataT; global dataE;
@@ -236,7 +236,7 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
             dataTest_label.append(  fpp ) 
             #dataJJ += '{"m":"'+str(i)+'",'+'"'+str(col_df.iloc[i].name)+'"'+":1},"
             dataJJ += '{"m":"'+str(col_df.iloc[i].name)+'",'+'"'+str(col_df.iloc[i].name)+'"'+":1},"
-        dataJJ += '{"m":"0"}]';  dataTest_label.append(cc(0))
+        dataJJ += '{"m":"0"}]';  dataTest_label.append(0)
         # dataJJ += ']'
         dataJJ = json.loads(dataJJ)
 
@@ -279,7 +279,7 @@ def feed_data(dataJJ, p_abs, d_st = False, pand=False, p_col = False):
     else:     
         if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
         else:     return json_df.iloc[:,3:].as_matrix().tolist() 
-# TEST -> ALWAYS WITH 10023 ... cx -> conditional 
+# TEST -> ALWAYS WITH 6D ... cx -> conditional 
 def get_data_test( desc ): 
     if desc == 1: 
         json_str = '''[
@@ -327,6 +327,9 @@ def get_tests(url_test='url', force=False):
         #d_st = display status
         dsp = feed_data(json_data ,pand=True, d_st=True)
         dsp["FP"] = tmpLab
+        #normalize(2)
+        del dsp['FP_P']
+        dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
     else:    
         return True
     
@@ -337,6 +340,10 @@ def get_columns(force=False):
         flag_dsc = False
         #d_st = display status
         dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
+        #normalize(3)
+        dsc = dsc.drop(dsc.index[-1])
+        del dsc['FP_P']
+        dsc.insert(2, 'FP_P', dsc['FP'].map(lambda x: cc( x )))  
     else:    
         return True
     # indx=[];   index_col=0 if p_abs else 2 #abs=F => 2 == 6D

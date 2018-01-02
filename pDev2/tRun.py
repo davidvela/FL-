@@ -17,6 +17,12 @@ def mainRun():
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
     md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
+    force = False        
+    url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
+    md.get_tests(url_test, force)
+    md.get_columns(force)
+
 
     for ex in executions:
         md.spn = ex["spn"]; md.dType = ex["dt"]; epochs = ex["e"]
@@ -30,9 +36,7 @@ def mainRun():
 
         mr.evaluate( )
 
-
-        url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
-        mr.tests(url_test, p_col=True  )
+        mr.tests(url_test, p_col=False  )
 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
 
