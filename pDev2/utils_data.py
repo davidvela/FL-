@@ -38,7 +38,7 @@ dType      = "C4" #C1, C2, C4
 #---------------------------------------------------------------------
 MODEL_DIR  = LOGDIR + DESC + '/'   
 
-LAB_DS     = LOGDAT + DESC + DL #"../../_zfp/data/FRFLO/datal.csv"
+# LAB_DS     = LOGDAT + DESC + DL # NOT USED!
 COL_DS     = LOGDAT + DESC + DC 
 ALL_DSJ    = LOGDAT + DESC + DSJ 
 ALL_DS     = LOGDAT + DESC + DSC 
@@ -51,6 +51,13 @@ dataE  = {'label' : [] , 'data' :  [] }
 
 flag_dsp = True        
 flag_dsc = True 
+
+def setDESC(pDESC): 
+    global COL_DS, ALL_DS, ALL_DSJ, DESC
+    DESC = pDESC
+    COL_DS     = LOGDAT + DESC + DC 
+    ALL_DSJ    = LOGDAT + DESC + DSJ 
+    ALL_DS     = LOGDAT + DESC + DSC 
 
 def des(): return DESC+'_'+dType+"_filt:"+  filter[0]+str(filter[1])
 def c2(df, rv=1):
@@ -229,7 +236,21 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
     col_df = col_df.fillna(0)
     print("input-no={}".format( len(col_df )))
-    #indx = col_df.index
+    
+    try:
+        indx = dst.columns
+    except TypeError:
+        indx = col_df.index
+        indx = indx.insert(0, "M")
+        indx = indx.insert(1, "FP")
+        indx = indx.insert(2, "FP_P")
+    # else: print(True)
+    print(indx)
+    print(COL_DS)
+    print(col_df)
+
+    return
+
     if p_col:    
         dataTest_label = []
         dataJJ = "["
@@ -243,7 +264,9 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
         # dataJJ += ']'
         dataJJ = json.loads(dataJJ)
 
-    json_df  = pd.DataFrame(columns=dst.columns); df_entry = pd.Series(index=dst.columns)
+
+    json_df  = pd.DataFrame(columns=indx); df_entry = pd.Series(index=indx)
+    
     df_entry = df_entry.fillna(0) 
     ccount = Counter()
     if(isinstance(dataJJ, list)):json_data = dataJJ
@@ -283,7 +306,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
         if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
         else:     return json_df.iloc[:,3:].as_matrix().tolist() 
 # TEST -> ALWAYS WITH 6D ... cx -> conditional 
-def get_data_test( desc ): 
+def get_data_test( desc = 1 ): 
     if desc == 1: 
         json_str = '''[
             { "m":"PBV10476AS", "178583" :0.74598 , "106104" :0.1 , "182789" :0.04 , "130172" :0.035 , "179661" :0.035 , "164421" :0.018 , "600040" :0.0108 , "116165" :0.008 , "164419" :0.0018 , "103396" :0.001 , "130217" :0.001 , "131460" :0.001 , "690750" :0.0007 , "611089" :0.0006 , "130058" :0.0004 , "130354" :0.0002 , "131101" :0.0002 , "131435" :0.00012 , "131136" :0.0001 , "131315" :0.0001 },   
@@ -293,18 +316,7 @@ def get_data_test( desc ):
             { "m":"4", "100023" :0.5 , "100034" :0.5 },
             { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
         tmpLab = [50, 73, 75, 46, 60, 75]
-        
-    elif desc == 2: #most used 
-        json_str = '''[
-            { "m":"PBV10476AS", "178583" :0.74598 , "106104" :0.1 , "182789" :0.04 , "130172" :0.035 , "179661" :0.035 , "164421" :0.018 , "600040" :0.0108 , "116165" :0.008 , "164419" :0.0018 , "103396" :0.001 , "130217" :0.001 , "131460" :0.001 , "690750" :0.0007 , "611089" :0.0006 , "130058" :0.0004 , "130354" :0.0002 , "131101" :0.0002 , "131435" :0.00012 , "131136" :0.0001 , "131315" :0.0001 },
-            { "m":"1", "100023" : 1 },
-            { "m":"2", "100025" : 1 },
-            { "m":"3", "100034" : 1 },
-            { "m":"4", "100023" :0.5 , "100034" :0.5 },
-            { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
-        tmpLab = [50, 73, 75, 46, 60, 75]
-
-    elif desc == 3 : 
+    else: 
         json_str =  '''[
             { "m":"8989", "100023" :0.5 },
             { "m":"8988", "100023" :0.5 , "100025" :0.5 }] '''
@@ -312,26 +324,28 @@ def get_data_test( desc ):
     return json_str, tmpLab
 
         
-def get_tests(url_test='url', force=False): 
+def get_tests(url_test='url', force=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv" ): 
     global dsp, flag_dsp 
     
     if flag_dsp or force: 
         flag_dsp = False
-        if url_test != 'url':   # test  file 
-            #DESC     = "FREXP1_X"
-            json_data = url_test + "data_jsonX.txt"
-            tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
+        # 1 -- READ JSON 
+        if url_test != 'url':           # test  file 
+            json_data = url_test + pDataFile
+            tmpLab = pd.read_csv( url_test + pLabelFile, sep=',', usecols=[0,1])    
             tmpLab = tmpLab.loc[:,'fp'].tolist()
-        else:                   # get data test JSON = url
+            #DESC     = "FREXP1_X"
+        else:                           # get data test JSON = url
             json_str, tmpLab = get_data_test(1) 
             json_data = json.loads(json_str)
             #DESC =  'matnrList...'
-        #d_st = display status
-        dsp = feed_data(json_data ,pand=True, d_st=True)
+        dsp = feed_data(json_data ,pand=True, d_st=True)       #d_st = display status
         dsp["FP"] = tmpLab
         #normalize(2)
         del dsp['FP_P']
         dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
+        # 2 -- READ EXCEL 
+        # pass 
     else:    
         return True
       
@@ -376,15 +390,37 @@ def testsJ(excel):
   
     start = time.time()
     dataAll['data'] = feed_data(json_data, pand=True, d_st=True,  p_exp=False);
-    elapsed_time = float(time.time() - start)
+
     # TO DO: separate between training and evaluation! 
     
-    print("data read - time:{}" .format(elapsed_time ))
-    if excel == True:# Create the excel with the new layout!  
-        writer = pd.ExcelWriter(LOGDAT+'pandas.xlsx')
-        dataAll['data'].to_excel(writer, sheet_name='Sheet1')
+    print("data read - time:{}" .format(float(time.time() - start) ))
+    down_excel(dataAll['data'], excel)
+
+def testsJ2(excel=True, split = False, ):
+    start = time.time()
+    print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
+
+    setDESC("FLALL2")
+    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   url_test = "url"
+    url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    get_tests(url_test, False, dataFile, labelFile ); tmp = dsp;
+    # if pcol: getColumns(); tmp = dsc
+    del tmp['FP_P']
+
+    if split: 
+        pass # separate betweent TR and EV     
+
+    print("data read - time:{}" .format(float(time.time() - start) ))
+    down_excel(tmp,  excel)
+
+def down_excel(data, excel_flag): 
+    if excel_flag: 
+        writer = pd.ExcelWriter(LOGDAT+'pandas_datasc.xlsx')
+        data.to_excel(writer, sheet_name='Sheet1')
         writer.save()
         print("JSON downloaded into excel! ")
+
+
 
 def split_data():
     data_o = "datasc.cvs"
@@ -395,7 +431,8 @@ def split_data():
     #control split - I need more information... 
 
 if __name__ == '__main__':
+    
     print("hi1")
-    # mainRead()   
-    ninp, nout  = mainRead2(ALL_DS, 1, 2 )  
-    #testsJ(False)
+    #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    testsJ2(True)
