@@ -239,17 +239,13 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     
     try:
         indx = dst.columns
-    except TypeError:
+    # except TypeError:
+    except NameError:
         indx = col_df.index
         indx = indx.insert(0, "M")
         indx = indx.insert(1, "FP")
         indx = indx.insert(2, "FP_P")
     # else: print(True)
-    print(indx)
-    print(COL_DS)
-    print(col_df)
-
-    return
 
     if p_col:    
         dataTest_label = []
@@ -264,6 +260,8 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
         # dataJJ += ']'
         dataJJ = json.loads(dataJJ)
 
+    if pd.core.indexes.numeric.is_integer_dtype(col_df.index):  isInt = True
+    else: isInt = False
 
     json_df  = pd.DataFrame(columns=indx); df_entry = pd.Series(index=indx)
     
@@ -281,14 +279,16 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
         for key in json_data[i]:
             if key == "m": pass            
             else: 
-                #key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
-                key_wz = int(key)
+                # key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
+                if isInt : key_wz = int(key)     # if comp NOT conatin lett
+                else: key_wz = str(key)       # if comp contains letters
+                
                 try: #filling of key - experimental or COMP 
                     #print(key_wz); print(type(key_wz))
                     ds_comp = col_df.loc[key_wz]
                     #print(ds_comp)
                     col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) 
-                    # df_entr#y.loc[col_key]
+                    # df_entry.loc[col_key]
                     df_entry[col_key] =  np.float32(json_data[i][key])
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
