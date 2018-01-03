@@ -229,7 +229,7 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
     return gt3, gtM 
 
-def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
+def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
     #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
     index_col = 2 #name - num, abs = cc
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
@@ -268,8 +268,11 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     if(isinstance(dataJJ, list)):json_data = dataJJ
     else: json_str=open(dataJJ).read();  json_data = json.loads(json_str)
     
+    if p_all: ll = range(len(json_data))
+    else: ll = range(ll_st, ll_en)
+
     #for i in range(2):
-    for i in range(len(json_data)): # print(i)
+    for i in ll: # print(i)
         df_entry *= 0
         m = str(json_data[i]["m"])
         df_entry.name = m
@@ -323,7 +326,7 @@ def get_data_test( desc = 1 ):
     return json_str, tmpLab
 
         
-def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv", p_dst=True ): 
+def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv", p_dst=True, p_all = True ): 
     global dsp, flag_dsp 
     
     if flag_dsp or force: 
@@ -341,7 +344,7 @@ def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jso
                 json_data = json.loads(json_str)
                 #DESC =  'matnrList...'
         
-            dsp = feed_data(json_data ,pand=True, d_st=p_dst)       #d_st = display status
+            dsp = feed_data(json_data ,pand=True, d_st=p_dst, p_all = p_all)       #d_st = display status
             dsp["FP"] = tmpLab
             #normalize(2)
             del dsp['FP_P']
@@ -399,6 +402,7 @@ def testsJ(excel):
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(dataAll['data'], excel)
 
+ll_st = 0; ll_en=10000;
 def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
@@ -407,7 +411,7 @@ def testsJ2(excel=True, split = False, pTest = True):
     setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest: 
-        get_tests(url_test, False, False, dataFile, labelFile, False ); tmp = dsp;
+        get_tests(url_test, False, False, dataFile, labelFile, False, True ); tmp = dsp;
     else: 
         getColumns(); tmp = dsc
     
