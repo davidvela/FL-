@@ -239,11 +239,11 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
     
     try:
         indx = dst.columns
+        indx = indx.delete(2)
     except NameError:  #TypeError
         indx = col_df.index
         indx = indx.insert(0, "M")
-        indx = indx.insert(1, "FP")
-        indx = indx.insert(2, "FP_P")
+        indx = indx.insert(1, "FP")  # indx = indx.insert(2, "FP_P")
 
     if p_col:    
         dataTest_label = []
@@ -345,10 +345,9 @@ def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jso
                 #DESC =  'matnrList...'
         
             dsp = feed_data(json_data ,pand=True, d_st=p_dst, p_all = p_all)       #d_st = display status
-            dsp["FP"] = tmpLab
-            #normalize(2)
-            del dsp['FP_P']
-        dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
+            
+            if p_all: dsp["FP"] = tmpLab      #normalize(2)  # del dsp['FP_P']
+        if p_all: dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
 
     else:    
         return True
@@ -363,7 +362,7 @@ def get_columns(force=False, pp_excel = False):
             dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
             #normalize(3)
             dsc = dsc.drop(dsc.index[-1])
-            del dsc['FP_P']
+            # del dsc['FP_P']
         dsc.insert(2, 'FP_P', dsc['FP'].map(lambda x: cc( x )))  
     else:    
         return True
@@ -402,7 +401,7 @@ def testsJ(excel):
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(dataAll['data'], excel)
 
-ll_st = 0; ll_en=10000;
+ll_st = 0; ll_en=10;
 def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
@@ -411,11 +410,11 @@ def testsJ2(excel=True, split = False, pTest = True):
     setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest: 
-        get_tests(url_test, False, False, dataFile, labelFile, False, True ); tmp = dsp;
+        get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
     else: 
         getColumns(); tmp = dsc
     
-    del tmp['FP_P']
+    # del tmp['FP_P']
 
     if split: 
         pass # separate betweent TR and EV     
@@ -441,7 +440,7 @@ def split_data():
 def main(): 
     print("hi1")
     #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     testsJ2(excel=True, split = False, pTest = True)
 
 if __name__ == '__main__':
