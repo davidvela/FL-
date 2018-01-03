@@ -104,7 +104,8 @@ def dc(df, val = 1 ):
     except: val = 0
     return val
 
-# def read_data2(path):
+def read_data2(path): #NOT USED
+    pass
     # columns = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" ,skiprows=0, nrows=1)
     # columns = columns.columns
     # dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" , skiprows=128, nrows=128)
@@ -228,7 +229,6 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
     return gt3, gtM 
 
-
 def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
     index_col = 2 #name - num, abs = cc
@@ -239,13 +239,11 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     
     try:
         indx = dst.columns
-    # except TypeError:
-    except NameError:
+    except NameError:  #TypeError
         indx = col_df.index
         indx = indx.insert(0, "M")
         indx = indx.insert(1, "FP")
         indx = indx.insert(2, "FP_P")
-    # else: print(True)
 
     if p_col:    
         dataTest_label = []
@@ -280,16 +278,17 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
             if key == "m": pass            
             else: 
                 # key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
-                if isInt : key_wz = int(key)     # if comp NOT conatin lett
-                else: key_wz = str(key)       # if comp contains letters
+                
+                # if isInt : key_wz = int(key)  # if comp NOT conatin lett
+                # else: key_wz = str(key)       # if comp contains letters
                 
                 try: #filling of key - experimental or COMP 
-                    #print(key_wz); print(type(key_wz))
-                    ds_comp = col_df.loc[key_wz]
-                    #print(ds_comp)
-                    col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) 
-                    # df_entry.loc[col_key]
-                    df_entry[col_key] =  np.float32(json_data[i][key])
+                    
+                    # ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
+                    # col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
+                    
+                    col_key = str(key)  
+                    df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
 
@@ -305,6 +304,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
     else:     
         if p_col: return json_df.iloc[:,3:].as_matrix().tolist(), dataTest_label
         else:     return json_df.iloc[:,3:].as_matrix().tolist() 
+
 # TEST -> ALWAYS WITH 6D ... cx -> conditional 
 def get_data_test( desc = 1 ): 
     if desc == 1: 
@@ -324,40 +324,44 @@ def get_data_test( desc = 1 ):
     return json_str, tmpLab
 
         
-def get_tests(url_test='url', force=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv" ): 
+def get_tests(url_test='url', force=False, excel = False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv" ): 
     global dsp, flag_dsp 
     
     if flag_dsp or force: 
         flag_dsp = False
-        # 1 -- READ JSON 
-        if url_test != 'url':           # test  file 
-            json_data = url_test + pDataFile
-            tmpLab = pd.read_csv( url_test + pLabelFile, sep=',', usecols=[0,1])    
-            tmpLab = tmpLab.loc[:,'fp'].tolist()
-            #DESC     = "FREXP1_X"
-        else:                           # get data test JSON = url
-            json_str, tmpLab = get_data_test(1) 
-            json_data = json.loads(json_str)
-            #DESC =  'matnrList...'
-        dsp = feed_data(json_data ,pand=True, d_st=True)       #d_st = display status
-        dsp["FP"] = tmpLab
-        #normalize(2)
-        del dsp['FP_P']
-        dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
         # 2 -- READ EXCEL 
-        # pass 
+        if excel: dsp = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_tx.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+        else: # 1 -- READ JSON 
+            if url_test != 'url':           # test  file 
+                json_data = url_test + pDataFile
+                tmpLab = pd.read_csv( url_test + pLabelFile, sep=',', usecols=[0,1])    
+                tmpLab = tmpLab.loc[:,'fp'].tolist()
+                #DESC     = "FREXP1_X"
+            else:                           # get data test JSON = url
+                json_str, tmpLab = get_data_test(1) 
+                json_data = json.loads(json_str)
+                #DESC =  'matnrList...'
+        
+            dsp = feed_data(json_data ,pand=True, d_st=True)       #d_st = display status
+            dsp["FP"] = tmpLab
+            #normalize(2)
+            del dsp['FP_P']
+        dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
+
     else:    
         return True
       
-def get_columns(force=False): 
+def get_columns(force=False, excel = False): 
     global dsc, flag_dsc 
     if flag_dsc or force: 
-        flag_dsc = False
-        #d_st = display status
-        dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
-        #normalize(3)
-        dsc = dsc.drop(dsc.index[-1])
-        del dsc['FP_P']
+        if excel : dsc = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_cc.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+        else: 
+            flag_dsc = False
+            #d_st = display status
+            dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
+            #normalize(3)
+            dsc = dsc.drop(dsc.index[-1])
+            del dsc['FP_P']
         dsc.insert(2, 'FP_P', dsc['FP'].map(lambda x: cc( x )))  
     else:    
         return True
@@ -396,15 +400,16 @@ def testsJ(excel):
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(dataAll['data'], excel)
 
-def testsJ2(excel=True, split = False, ):
+def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
-    setDESC("FLALL2")
-    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   url_test = "url"
-    url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
-    get_tests(url_test, False, dataFile, labelFile ); tmp = dsp;
-    # if pcol: getColumns(); tmp = dsc
+    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
+    # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    
+    if pTest: get_tests(url_test, False, dataFile, labelFile ); tmp = dsp;
+    else: getColumns(); tmp = dsc
+    
     del tmp['FP_P']
 
     if split: 
@@ -420,8 +425,6 @@ def down_excel(data, excel_flag):
         writer.save()
         print("JSON downloaded into excel! ")
 
-
-
 def split_data():
     data_o = "datasc.cvs"
     data_t = "datasct2.cvs" #t100 - keep the order! 
@@ -430,9 +433,11 @@ def split_data():
 
     #control split - I need more information... 
 
-if __name__ == '__main__':
-    
+def main(): 
     print("hi1")
     #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    testsJ2(True)
+    mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    testsJ2(excel=True, split = False, pTest = True)
+
+if __name__ == '__main__':
+    main()
