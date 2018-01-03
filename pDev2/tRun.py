@@ -12,16 +12,16 @@ executions = [
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_" ; md.DESC = "FRFLO"; ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
+    final = "_" ;   md.DESC = "FRFLO";   ALL_DS = md.LOGDAT + md.DESC + md.DSC 
+    
     # DATA READ 
-    ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    # md.mainRead2(ALL_DS, 1, 2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
+    md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
 
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False        
     md.get_tests(url_test, force)
-    md.get_columns(force)
+    # md.get_columns(force)
 
 
     for ex in executions:
@@ -34,11 +34,15 @@ def mainRun():
         mr.build_network3()
         print(mr.model_path)    
 
-        mr.evaluate( )
+        # mr.evaluate( )
 
         mr.tests(url_test, p_col=False  )
 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
+
+
+    for i in range(10):
+        print("m:{0:15} - P1-{1}  P2-{2} P3-{3}" .format(md.dsp.iloc[i,0], 1,2,3))    
 
 if __name__ == '__main__':
     mainRun()

@@ -275,19 +275,18 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False):
         df_entry.name = m
         df_entry["M"] = m
         for key in json_data[i]:
-            if key == "m": pass            
-            else: 
+            if key != "m": 
                 # key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 
                 # if isInt : key_wz = int(key)  # if comp NOT conatin lett
                 # else: key_wz = str(key)       # if comp contains letters
                 
                 try: #filling of key - experimental or COMP 
-                    
-                    # ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
-                    # col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
-                    
-                    col_key = str(key)  
+                    if d_st:
+                        ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
+                        col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
+                    else: 
+                        col_key = str(int(key)) 
                     df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
@@ -324,13 +323,13 @@ def get_data_test( desc = 1 ):
     return json_str, tmpLab
 
         
-def get_tests(url_test='url', force=False, excel = False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv" ): 
+def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv", p_dst=True ): 
     global dsp, flag_dsp 
     
     if flag_dsp or force: 
         flag_dsp = False
         # 2 -- READ EXCEL 
-        if excel: dsp = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_tx.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+        if pp_excel: dsp = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_tx.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
         else: # 1 -- READ JSON 
             if url_test != 'url':           # test  file 
                 json_data = url_test + pDataFile
@@ -342,7 +341,7 @@ def get_tests(url_test='url', force=False, excel = False, pDataFile = "data_json
                 json_data = json.loads(json_str)
                 #DESC =  'matnrList...'
         
-            dsp = feed_data(json_data ,pand=True, d_st=True)       #d_st = display status
+            dsp = feed_data(json_data ,pand=True, d_st=p_dst)       #d_st = display status
             dsp["FP"] = tmpLab
             #normalize(2)
             del dsp['FP_P']
@@ -351,10 +350,10 @@ def get_tests(url_test='url', force=False, excel = False, pDataFile = "data_json
     else:    
         return True
       
-def get_columns(force=False, excel = False): 
+def get_columns(force=False, pp_excel = False): 
     global dsc, flag_dsc 
     if flag_dsc or force: 
-        if excel : dsc = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_cc.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+        if pp_excel : dsc = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_cc.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
         else: 
             flag_dsc = False
             #d_st = display status
@@ -404,11 +403,13 @@ def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
-    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
-    # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    # setDESC("FRFLO"); url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
+    setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
-    if pTest: get_tests(url_test, False, dataFile, labelFile ); tmp = dsp;
-    else: getColumns(); tmp = dsc
+    if pTest: 
+        get_tests(url_test, False, False, dataFile, labelFile, False ); tmp = dsp;
+    else: 
+        getColumns(); tmp = dsc
     
     del tmp['FP_P']
 
