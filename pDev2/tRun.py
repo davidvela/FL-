@@ -4,7 +4,7 @@ from datetime import datetime
 import mRun as mr
 import utils_data as md
 
-executions = [
+execc = [
 { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
 { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
 { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
@@ -17,14 +17,16 @@ def mainRun():
     # DATA READ 
     # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
     md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    
 
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
-    force = False        
-    md.get_tests(url_test, force)
+    force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
+    md.get_tests(url_test, force, excel )
+
     # md.get_columns(force)
 
 
-    for ex in executions:
+    for ex in execc:
         md.spn = ex["spn"]; md.dType = ex["dt"]; epochs = ex["e"]
         
         md.normalize()
@@ -36,13 +38,14 @@ def mainRun():
 
         # mr.evaluate( )
 
-        mr.tests(url_test, p_col=False  )
+        ex["pt"] = mr.tests(url_test, p_col=False  )
 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
 
-
-    for i in range(10):
-        print("m:{0:15} - P1-{1}  P2-{2} P3-{3}" .format(md.dsp.iloc[i,0], 1,2,3))    
+    print("0<60_1>60__0<23_1<60_2<93_3>93  ")
+    for i in range(20):
+        print("m:{0:15} - R-{4:5}   ||    P1-{1:2}         P2-{2:2}        P3-{3}" 
+        .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
 
 if __name__ == '__main__':
     mainRun()

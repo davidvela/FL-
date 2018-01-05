@@ -401,7 +401,9 @@ def testsJ(excel):
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(dataAll['data'], excel)
 
-ll_st = 0; ll_en=10;
+# ll_st = 0; ll_en=10000; ll_en=20000; 26000; 32000; 38000; 44000; 
+# ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
+ll_st = 0; ll_en=10
 def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
@@ -445,3 +447,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+

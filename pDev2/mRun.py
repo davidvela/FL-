@@ -309,7 +309,7 @@ def vis_chart( ):
 
 md.DESC      = "FRFLO" # "FREXP"
 md.spn       = 5000  
-md.dType     = "C1" #C1, C2, C4
+md.dType     = "C2" #C1, C2, C4
 epochs       = 5 #100
 lr           = 0.001 #0.0001
 h            = [100 , 100]   #[40 , 10]   [200, 100, 40]
@@ -321,10 +321,12 @@ final        = "_" #FF or _
 def mainRun(): 
     global ninp, nout, model_path
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
+    #---------------------------------------------------------------
     # DATA READ 
+    #---------------------------------------------------------------
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    # md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout = md.getnn()
     # print(len(md.dst))
@@ -332,16 +334,22 @@ def mainRun():
     model_path = md.MODEL_DIR + "model.ckpt" 
     force = False        
     url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
-    # md.get_tests(url_test, force)
-    # md.get_columns(force)
+    md.get_tests(url_test, force, False)
+    md.get_columns(force, False)
 
+    #---------------------------------------------------------------
+    # NETWORK
+    #---------------------------------------------------------------
     build_network3()
     print(model_path)
     print( get_nns() )
-    # epochs     = 10
     clean_traina()
-    # train(epochs, disp, batch_size)
-    # evaluate( )
+    
+    #---------------------------------------------------------------
+    # OP. 
+    #---------------------------------------------------------------
+    train(epochs, disp, batch_size)
+    evaluate( )
     
     tests(url_test, p_col=False  )
     vis_chart( )
