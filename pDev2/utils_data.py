@@ -265,6 +265,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
     
     df_entry = df_entry.fillna(0) 
     ccount = Counter()
+
     if(isinstance(dataJJ, list)):json_data = dataJJ
     else: json_str=open(dataJJ).read();  json_data = json.loads(json_str)
     
@@ -279,9 +280,9 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
         df_entry["M"] = m
         for key in json_data[i]:
             if key != "m": 
-                # key_wz = key if p_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
+                # key_wz = key if pp_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 
-                # if isInt : key_wz = int(key)  # if comp NOT conatin lett
+                # if isInt : key_wz = int(key)  # if comp NOT conatin letters
                 # else: key_wz = str(key)       # if comp contains letters
                 
                 try: #filling of key - experimental or COMP 
@@ -289,7 +290,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
                         ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
                         col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
                     else: 
-                        col_key = str(int(key)) 
+                        col_key = int(key) #str(int(key)) 
                     df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
@@ -352,14 +353,14 @@ def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jso
     else:    
         return True
       
-def get_columns(force=False, pp_excel = False): 
+def get_columns(force=False, pp_excel = False, p_dst=True): 
     global dsc, flag_dsc 
     if flag_dsc or force: 
         if pp_excel : dsc = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_cc.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
         else: 
             flag_dsc = False
             #d_st = display status
-            dsc = feed_data(dataJJ="", d_st=True, pand=True, p_col=True) 
+            dsc = feed_data(dataJJ="", d_st=p_dst, pand=True, p_col=True) 
             #normalize(3)
             dsc = dsc.drop(dsc.index[-1])
             # del dsc['FP_P']
@@ -403,18 +404,18 @@ def testsJ(excel):
 
 # ll_st = 0; ll_en=10000; ll_en=20000; 26000; 32000; 38000; 44000; 
 # ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
-ll_st = 0; ll_en=10
+ll_st = 0; ll_en = 10;
 def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
-    # setDESC("FRFLO"); url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
-    setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
+    # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
-    if pTest: 
-        get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
+    if pTest:                                               #   disp   all
+        get_tests(url_test, False, False, dataFile, labelFile, False, True ); tmp = dsp;
     else: 
-        getColumns(); tmp = dsc
+        get_columns(False, False, False); tmp = dsc
     
     # del tmp['FP_P']
 
@@ -443,7 +444,7 @@ def main():
     print("hi1")
     #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    testsJ2(excel=True, split = False, pTest = True)
+    testsJ2(excel=True, split = False, pTest = False)
 
 if __name__ == '__main__':
     main()

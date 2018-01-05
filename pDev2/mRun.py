@@ -171,8 +171,8 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     dataTest = {'label' : [] , 'data' :  [] };
     if compt: 
         get_columns( )  #md.dsc or dataset? 
-        # dataTest['data'], dataTest['label']  = md.feed_data("",  d_st=True, p_col=True)   
-        # md.dataT['data'].append(dataTest['data']) ;     md.dataT['label'].append(dataTest['label']) 
+        dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
+
         
     print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
     total_batch  = int(len(md.dataT['label']) / batch_size)   

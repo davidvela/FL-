@@ -27,11 +27,11 @@ def mainRun():
 
 
     for ex in execc:
-        md.spn = ex["spn"]; md.dType = ex["dt"]; epochs = ex["e"]
+        md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]
         
         md.normalize()
         mr.ninp, mr.nout = md.getnn()
-        md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(epochs, final=final) +"/" 
+        md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(mr.epochs, final=final) +"/" 
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()
         print(mr.model_path)    
