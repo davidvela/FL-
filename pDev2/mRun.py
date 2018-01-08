@@ -49,14 +49,12 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
 def fc(inp, nodes, kp, is_train):
     # h = tf.layers.dense( x, h[0], activation=tf.nn.relu,  name )
     h = tf.layers.dense( inp, nodes, use_bias=False, activation=None )
-    h = tf.layers.batch_normalization(h, training=is_train)
+    h = tf.layers.batch_normalization(h, training=is_train)      # CLASS
     h = tf.nn.relu(h)
     h = tf.nn.dropout(h, kp)
     return h
 def build_network2(is_train=False):     # Simple NN - with batch normalization (high level)
-    if   md.dType == "C1": top_k = 5
-    elif md.dType == "C4": top_k = 3
-    elif md.dType == "C2": top_k = 2
+    global top_k
 
     kp = 0.5
     inp = x
@@ -65,14 +63,21 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
     for i in range(len(h)): 
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
-    prediction=tf.reduce_max(y,1)
-    
+    prediction=tf.reduce_max(y,1)    # CLASS
+    # prediction = out                   # REG
+
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
-        softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)         
-        correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        
+        softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)                       # CLASS
+        correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))       # CLASS
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))      # CLASS
+    
+        # total_error = tf.reduce_sum(tf.square(tf.subtract(y, tf.reduce_mean(y))))       # REG
+        # unexplained_error = tf.reduce_sum(tf.square(tf.subtract(y, prediction)))        # REG
+        # R_squared = tf.subtract(tf.to_float(1), tf.div(total_error, unexplained_error)) # REG
+        # accuracy = tf.reduce_mean(tf.square(prediction-y))                              # REG
+
+
         tf.summary.scalar("accuracy", accuracy)
 
     return out, accuracy, softmaxT
@@ -112,11 +117,14 @@ def build_network3():
     print("build network")
     global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
     x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
-    y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
+    # y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
+    y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
     prediction, accuracy, softmaxT = build_network2()
+    
     with tf.name_scope("xent"): #loss
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
         tf.summary.scalar("xent", cost)
+    
     with tf.name_scope("train"): #optimizer
         optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
     summ = tf.summary.merge_all()
@@ -138,30 +146,6 @@ def restore_model(sess):
     saver= tf.train.Saver() 
     print("Model restored from file: %s" % model_path)
     saver.restore(sess, model_path)
-def get_data_test( desc ): 
-    if desc == "FRFLO": 
-        json_str = '''[
-            { "m":"1", "100023" : 1 },
-            { "m":"2", "100025" : 1 },
-            { "m":"3", "100034" : 1 },
-            { "m":"4", "100023" :0.5 , "100034" :0.5 },
-            { "m":"10", "100023" :0.5, "100025" :0.5 }] '''
-        tmpLab = [73, 75, 46, 60, 75]
-    elif desc == "FRALL": #most used 
-        json_str =  '''[
-            { "m":"1", "c1122" : 1 },
-            { "m":"2", "c884"  : 1 },
-            { "m":"3", "c825"  : 1 },
-            { "m":"4", "c1122" : 0.5 , "c825" :0.5 },
-            { "m": 5,   "c903" :1	}     ] '''
-        tmpLab = [121,110, 75, 90, 44]
-
-    elif desc == "TESTS" : 
-        json_str =  '''[
-            { "m":"8989", "c1" :0.5 },
-            { "m":"8988", "c3" :0.5 , "c4" :0.5 }] '''
-        tmpLab = [59,99]
-    return json_str, tmpLab
 
 # OPERATIONS-----------------------------------------------------
 def train(it = 100, disp=50, batch_size = 128, compt = False): 
@@ -170,7 +154,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
 
     dataTest = {'label' : [] , 'data' :  [] };
     if compt: 
-        md.get_columns( )  #md.dsc or dataset? 
+        md.get_columns(pp_excel = True )  #md.dsc or dataset? 
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
 
         
@@ -261,7 +245,7 @@ def tests(url_test = 'url', p_col=False):
             tmpLab = tmpLab.loc[:,'fp']
             DESC   = "FREXP1_X"
         else:                   # get data test JSON = url
-            json_str, tmpLab = get_data_test(md.DESC)
+            json_str, tmpLab = md.get_data_test(md.DESC)
             json_data = json.loads(json_str)
             DESC =  'matnrList...'
         force = False
@@ -309,18 +293,18 @@ def vis_chart( ):
 
 md.DESC      = "FRFLO" # "FREXP"
 md.spn       = 5000  
-md.dType     = "C1" #C1, C2, C4
-epochs       = 1000 #100
+md.dType     = "C2" #C1, C2, C4, C0
+epochs       = 20 #100
 
-lr           = 0.001 #0.0001
-h            = [100 , 100]   #[40 , 10]   [200, 100, 40]
+lr           = 0.01 #0.0001
+h            = [100 , 100]   #[40 , 10]   [200, 100, 40] [100,100]
 ninp, nout   = 10, 10
 disp         = 5
 batch_size   = 128
 final        = "_" #FF or _
 
 def mainRun(): 
-    global ninp, nout, model_path
+    global ninp, nout, model_path, top_k
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
     #---------------------------------------------------------------
     # DATA READ 
@@ -329,7 +313,7 @@ def mainRun():
     md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
-    ninp, nout = md.getnn()
+    ninp, nout, top_k = md.getnn()
     # print(len(md.dst))
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
@@ -349,6 +333,7 @@ def mainRun():
     #---------------------------------------------------------------
     # OP.                           comp. 
     #---------------------------------------------------------------
+
     train(epochs, disp, batch_size, True)
     evaluate( )
     

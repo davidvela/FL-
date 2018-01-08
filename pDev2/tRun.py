@@ -30,7 +30,7 @@ def mainRun():
         md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]
         
         md.normalize()
-        mr.ninp, mr.nout = md.getnn()
+        mr.ninp, mr.nout, mr.top_k = md.getnn()
         md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(mr.epochs, final=final) +"/" 
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()

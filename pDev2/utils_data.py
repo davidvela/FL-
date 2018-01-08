@@ -93,15 +93,20 @@ def cN(df):
     elif  dfIndex >= nout:      listofzeros[nout-1]  = 1
     
     return listofzeros 
+
 # Maybe I can do this with hot-encoder in sckitlearn
 def cc(x, rv=1):
     global nout
     if   dType == 'C4':  nout = 4;   return c4(x, rv);
     elif dType == 'C1':  nout = 102; return cN(x); 
     elif dType == 'C2':  nout = 2;   return c2(x, rv);
+    elif dType == 'C0':  nout = 1;   return [x];
 def dc(df, val = 1 ): 
-    try:    val = df.index(val)
-    except: val = 0
+    
+    if dType == "C0": return df 
+    else: 
+        try:    val = df.index(val)
+        except: val = 0    
     return val
 
 def read_data2(path): #NOT USED
@@ -202,10 +207,11 @@ def mainRead2(path, part, batch_size,  all = True, shuffle = True):  # read by p
  
 def getnn():
     ninp = len(dst.columns) - 3 
-    if   dType == 'C2':  nout = 2;   
-    if   dType == 'C4':  nout = 4;   
-    elif dType == 'C1':  nout = 102;
-    return ninp, nout
+    if   dType == 'C4':  nout = 4;   top_k = 3
+    elif dType == 'C2':  nout = 2;   top_k = 2
+    elif dType == 'C1':  nout = 102; top_k = 5
+    elif dType == 'C0':  nout = 1;   top_k = 1
+    return ninp, nout, top_k
 
 def check_perf_CN(predv, dataEv, sk_ev=False ):
     gt3 = 0; gtM = 0; 
