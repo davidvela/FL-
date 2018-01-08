@@ -64,24 +64,45 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
     prediction=tf.reduce_max(y,1)    # CLASS
-    # prediction = out                   # REG
+    # prediction = out                 # REG
 
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
         softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)                       # CLASS
         correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))       # CLASS
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))      # CLASS
-    
-        # total_error = tf.reduce_sum(tf.square(tf.subtract(y, tf.reduce_mean(y))))       # REG
-        # unexplained_error = tf.reduce_sum(tf.square(tf.subtract(y, prediction)))        # REG
-        # R_squared = tf.subtract(tf.to_float(1), tf.div(total_error, unexplained_error)) # REG
-        # accuracy = tf.reduce_mean(tf.square(prediction-y))                              # REG
-
+        
+        # total_error = tf.reduce_sum(tf.square(tf.subtract(y, tf.reduce_mean(y))))        # REG
+        # unexplained_error = tf.reduce_sum(tf.square(tf.subtract(y, out)))                # REG
+        # accuracy = tf.subtract(tf.to_float(1), tf.div(total_error, unexplained_error))   # REG
 
         tf.summary.scalar("accuracy", accuracy)
 
     return out, accuracy, softmaxT
-def build_network1( ):                  # Simple NN - 2layers - matmul 
+
+def build_network3():
+    tf.reset_default_graph()
+
+    print("build network")
+    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
+    x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
+    # y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
+    y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
+    prediction, accuracy, softmaxT = build_network2()
+    
+    with tf.name_scope("xent"): #loss
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+        # cost = tf.reduce_mean(tf.square(prediction-y) )
+        tf.summary.scalar("xent", cost)
+    
+    with tf.name_scope("train"): #optimizer
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
+    summ = tf.summary.merge_all()
+    saver= tf.train.Saver()
+
+
+def build_network1( ):
+    # Simple NN - 2layers - matmul 
     biases  = { 'b1': tf.Variable(tf.random_normal( [ h[0] ]),        name="Bias_1"),
                 'b2': tf.Variable(tf.random_normal( [ h[1] ]),        name="Bias_2"),
                 'out': tf.Variable(tf.random_normal( [nout] ),        name="Bias_out") }
@@ -108,28 +129,7 @@ def build_network1( ):                  # Simple NN - 2layers - matmul
         correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         tf.summary.scalar("accuracy", accuracy)
-
-
     return out, accuracy, softmaxT, biases, weights
-def build_network3():
-    tf.reset_default_graph()
-
-    print("build network")
-    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
-    x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
-    # y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
-    y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
-    prediction, accuracy, softmaxT = build_network2()
-    
-    with tf.name_scope("xent"): #loss
-        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
-        tf.summary.scalar("xent", cost)
-    
-    with tf.name_scope("train"): #optimizer
-        optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
-    summ = tf.summary.merge_all()
-    saver= tf.train.Saver()
-
 def old():
     # prediction, accuracy, softmaxT, biases, weights = build_network1()
     prediction, accuracy, softmaxT = build_network2()
@@ -293,7 +293,7 @@ def vis_chart( ):
 
 md.DESC      = "FRFLO" # "FREXP"
 md.spn       = 5000  
-md.dType     = "C2" #C1, C2, C4, C0
+md.dType     = "C0" #C1, C2, C4, C0
 epochs       = 20 #100
 
 lr           = 0.01 #0.0001
