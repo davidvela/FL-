@@ -170,7 +170,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
 
     dataTest = {'label' : [] , 'data' :  [] };
     if compt: 
-        get_columns( )  #md.dsc or dataset? 
+        md.get_columns( )  #md.dsc or dataset? 
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
 
         
@@ -309,8 +309,9 @@ def vis_chart( ):
 
 md.DESC      = "FRFLO" # "FREXP"
 md.spn       = 5000  
-md.dType     = "C2" #C1, C2, C4
-epochs       = 5 #100
+md.dType     = "C1" #C1, C2, C4
+epochs       = 1000 #100
+
 lr           = 0.001 #0.0001
 h            = [100 , 100]   #[40 , 10]   [200, 100, 40]
 ninp, nout   = 10, 10
@@ -334,8 +335,8 @@ def mainRun():
     model_path = md.MODEL_DIR + "model.ckpt" 
     force = False        
     url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
-    md.get_tests(url_test, force, False)
-    md.get_columns(force, False)
+    md.get_tests(url_test=url_test, force=force, pp_excel=True)
+    md.get_columns(force, True)
 
     #---------------------------------------------------------------
     # NETWORK
@@ -346,9 +347,9 @@ def mainRun():
     clean_traina()
     
     #---------------------------------------------------------------
-    # OP. 
+    # OP.                           comp. 
     #---------------------------------------------------------------
-    train(epochs, disp, batch_size)
+    train(epochs, disp, batch_size, True)
     evaluate( )
     
     tests(url_test, p_col=False  )

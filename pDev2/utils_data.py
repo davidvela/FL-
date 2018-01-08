@@ -282,8 +282,8 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
             if key != "m": 
                 # key_wz = key if pp_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 
-                # if isInt : key_wz = int(key)  # if comp NOT conatin letters
-                # else: key_wz = str(key)       # if comp contains letters
+                if isInt : key_wz = int(key)  # if comp NOT conatin letters
+                else: key_wz = str(key)       # if comp contains letters
                 
                 try: #filling of key - experimental or COMP 
                     if d_st:
