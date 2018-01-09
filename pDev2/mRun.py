@@ -92,7 +92,7 @@ def build_network3():
     
     with tf.name_scope("xent"): #loss
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
-        # cost = tf.reduce_mean(tf.square(prediction-y) )
+        # cost = tf.reduce_mean(tf.square(prediction-y) )               # REG
         tf.summary.scalar("xent", cost)
     
     with tf.name_scope("train"): #optimizer
@@ -291,12 +291,12 @@ def vis_chart( ):
     return
 
 
-md.DESC      = "FRFLO" # "FREXP"
-md.spn       = 5000  
-md.dType     = "C0" #C1, C2, C4, C0
-epochs       = 20 #100
+md.DESC      = "FRALL1" # "FREXP"  FRFLO
+md.spn       = 10000  
+md.dType     = "C1" #C1, C2, C4, C0
+epochs       = 100 #100
 
-lr           = 0.01 #0.0001
+lr           = 0.001 #0.0001
 h            = [100 , 100]   #[40 , 10]   [200, 100, 40] [100,100]
 ninp, nout   = 10, 10
 disp         = 5
@@ -318,7 +318,7 @@ def mainRun():
     md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
     model_path = md.MODEL_DIR + "model.ckpt" 
     force = False        
-    url_test = md.LOGDAT + "FREXP1/" ; #url_test = "url"
+    url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
     md.get_tests(url_test=url_test, force=force, pp_excel=True)
     md.get_columns(force, True)
 
