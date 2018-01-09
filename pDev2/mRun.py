@@ -49,7 +49,7 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
 def fc(inp, nodes, kp, is_train):
     # h = tf.layers.dense( x, h[0], activation=tf.nn.relu,  name )
     h = tf.layers.dense( inp, nodes, use_bias=False, activation=None )
-    h = tf.layers.batch_normalization(h, training=is_train)      # CLASS
+    if md.dType != "C0": h = tf.layers.batch_normalization(h, training=is_train)      # CLASS
     h = tf.nn.relu(h)
     h = tf.nn.dropout(h, kp)
     return h
@@ -64,17 +64,18 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
     prediction=tf.reduce_max(y,1)    # CLASS
-    # prediction = out                 # REG
+    prediction = out                 # REG
 
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
         softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)                       # CLASS
         correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))       # CLASS
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))      # CLASS
-        
-        # total_error = tf.reduce_sum(tf.square(tf.subtract(y, tf.reduce_mean(y))))        # REG
-        # unexplained_error = tf.reduce_sum(tf.square(tf.subtract(y, out)))                # REG
-        # accuracy = tf.subtract(tf.to_float(1), tf.div(total_error, unexplained_error))   # REG
+
+        if md.dType == "C0":
+            total_error = tf.reduce_sum(tf.square(tf.subtract(y, tf.reduce_mean(y))))        # REG
+            unexplained_error = tf.reduce_sum(tf.square(tf.subtract(y, out)))                # REG
+            accuracy = tf.subtract(tf.to_float(1), tf.div(total_error, unexplained_error))   # REG
 
         tf.summary.scalar("accuracy", accuracy)
 
@@ -92,7 +93,7 @@ def build_network3():
     
     with tf.name_scope("xent"): #loss
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
-        # cost = tf.reduce_mean(tf.square(prediction-y) )               # REG
+        if md.dType == "C0": cost = tf.reduce_mean(tf.square(prediction-y) )               # REG
         tf.summary.scalar("xent", cost)
     
     with tf.name_scope("train"): #optimizer
@@ -100,6 +101,10 @@ def build_network3():
     summ = tf.summary.merge_all()
     saver= tf.train.Saver()
 
+def restore_model(sess):   
+    saver= tf.train.Saver() 
+    print("Model restored from file: %s" % model_path)
+    saver.restore(sess, model_path)
 
 def build_network1( ):
     # Simple NN - 2layers - matmul 
@@ -141,11 +146,6 @@ def old():
         optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
     summ = tf.summary.merge_all()
     saver= tf.train.Saver()
-
-def restore_model(sess):   
-    saver= tf.train.Saver() 
-    print("Model restored from file: %s" % model_path)
-    saver.restore(sess, model_path)
 
 # OPERATIONS-----------------------------------------------------
 def train(it = 100, disp=50, batch_size = 128, compt = False): 
@@ -206,6 +206,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
     logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
     dataTest = {'label' : [] , 'data' :  [] };
+
 def evaluate( ): 
     print("_____EVALUATION...")
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -293,7 +294,7 @@ def vis_chart( ):
 
 md.DESC      = "FRALL1" # "FREXP"  FRFLO
 md.spn       = 10000  
-md.dType     = "C1" #C1, C2, C4, C0
+md.dType     = "C0" #C1, C2, C4, C0
 epochs       = 100 #100
 
 lr           = 0.001 #0.0001

@@ -4,16 +4,29 @@ from datetime import datetime
 import mRun as mr
 import utils_data as md
 
-execc = [
-{ 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-{ 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-{ 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-]
+def get_models(type):
+    if type == "FRFLO":
+        return [
+            { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+        ]
+    elif type == "FRALL1":
+        return [
+            { 'dt':'C2',  "e":40, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+        ]
+    else: return []
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_" ;   md.DESC = "FRFLO";   ALL_DS = md.LOGDAT + md.DESC + md.DSC 
+    final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1
+    ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
+    execc = get_models(md.DESC)
+
     # DATA READ 
     # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
     md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
