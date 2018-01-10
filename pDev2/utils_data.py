@@ -11,9 +11,11 @@ import json
 import sys
 import os
 import time
+import operator
 from types import *
 from collections import Counter
 from datetime import datetime
+
 
 LOG = "../../LOG.txt"
 
@@ -213,7 +215,7 @@ def getnn():
     elif dType == 'C0':  nout = 1;   top_k = 1
     return ninp, nout, top_k
 
-def check_perf_CN(predv, dataEv, sk_ev=False ):
+def check_perf_CN(predv, dataEv, sk_ev=False, sf = True ):
     gt3 = 0; gtM = 0; 
     # predvList = predv.tolist()
     # assert(len(predv) == len(dataEv['label']))
@@ -223,16 +225,23 @@ def check_perf_CN(predv, dataEv, sk_ev=False ):
         if (i % 1000==0): print(str(i)) #, end="__") 
         try:
             # pred_v = dc( predv.tolist()[i], np.max(predv[i]))
-            pred_v = predv[1][i][0]
+            if sf: pred_v = predv[1][i][0]
+            else: pred_v = predv[i]
             data_v = dataEv[i] if sk_ev  else dc( dataEv[i])
-            if   dType == 'C4' and pred_v != data_v:  gt3=gtM=gtM+1
-            elif dType == 'C2' and pred_v != data_v:  gt3=gtM=gtM+1
-            elif dType == 'C1':
-                num = abs(pred_v-data_v)
-                if num > 3: gt3+=1
-                if num > 10: gtM+=1
+            gt3, gtM = tuple(map(operator.add, (gt3, gtM), comp_perf(data_v, pred_v  )))
+        
         except: print("error: i={}, pred={}, data={} -- ".format(i, pred_v, data_v))
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
+    return gt3, gtM 
+
+def comp_perf( val, pred): 
+    gt3 = 0; gtM = 0;     
+    if   dType == 'C4' and pred != val:  gt3=gtM=gtM+1
+    elif dType == 'C2' and pred != val:  gt3=gtM=gtM+1
+    else: #if dType == 'C1':
+        num = abs(pred-val)
+        if num > 3: gt3+=1
+        if num > 10: gtM+=1
     return gt3, gtM 
 
 def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):

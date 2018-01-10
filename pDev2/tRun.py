@@ -7,8 +7,8 @@ import utils_data as md
 def get_models(type):
     if type == "FRFLO":
         return [
-            { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            # { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            # { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
         ]
     elif type == "FRALL1":
@@ -22,7 +22,7 @@ def get_models(type):
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1
+    final = "_" ;  md.DESC = "FRFLO";  # FRFLO   FRALL1
     ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
     execc = get_models(md.DESC)
@@ -57,8 +57,9 @@ def mainRun():
 
     print("0<60_1>60__0<23_1<60_2<93_3>93  ")
     for i in range(20):
-        print("m:{0:15} - R-{4:5}   ||    P1-{1:2}         P2-{2:2}        P3-{3}" 
+        print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
+    
 
 if __name__ == '__main__':
     mainRun()
