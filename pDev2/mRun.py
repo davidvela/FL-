@@ -265,7 +265,7 @@ def tests(url_test = 'url', p_col=False):
     range_ts = len(predv) if len(predv)<20 else 20
     for i in range( range_ts ):
         # print("RealVal: {}  - PP value: {}".format( md.dc( dataTest['label'][i]), md.dc( predv.tolist()[i], np.max(predv[i]))  ))  
-        print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc( dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]   ))
+        print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc( dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]  ))
 
     # return
     gt3, gtM = md.check_perf_CN(sf, dataTest["label"], False)

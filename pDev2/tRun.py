@@ -20,6 +20,21 @@ def get_models(type):
         ]
     else: return []
 
+def print_results(execc, typ = "pt"): 
+    print("0<60_1>60__0<23_1<60_2<93_3>93  ")
+    for i in range(20): 
+        # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
+        # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
+    
+        promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0])  
+        promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
+        print(promp)
+
+def print_pred( ex , typ, i  ): 
+    promp =  "_____________" + ex["dt"] 
+    if ex["dt"] == "C1": return promp + "{0}".format(ex[typ][1][i])
+    else: return promp + "{0:2}".format(ex[typ][1][i][0])
+
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
     final = "_" ;  md.DESC = "FRFLO";  # FRFLO   FRALL1
@@ -38,7 +53,6 @@ def mainRun():
 
     # md.get_columns(force)
 
-
     for ex in execc:
         md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]
         
@@ -54,29 +68,10 @@ def mainRun():
         ex["pt"] = mr.tests(url_test, p_col=False  )
 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
-
-    print("0<60_1>60__0<23_1<60_2<93_3>93  ")
-    for i in range(20):
-        print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
-        .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
-    
+    print_results(execc, typ = "pt") 
 
 if __name__ == '__main__':
     mainRun()
-
-
-def bk():
-    for i in range(20):
-        print("RealVal: {}  - PP value: {}".format( md.dc( md.dataE['label'][i]), 
-                                                    md.dc( predv.tolist()[i], np.max(predv[i]))  ))
-    gt3, gtM = md.check_perf_CN(softv, md.dataE, False) #predv
-
-
-    range_ts = len(predv) if len(predv)<20 else 20
-    for i in range( range_ts ):
-        # print("RealVal: {}  - PP value: {}".format( md.dc( dataTest['label'][i]), md.dc( predv.tolist()[i], np.max(predv[i]))  ))  
-        print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc( dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]   ))
-
 
 
 
