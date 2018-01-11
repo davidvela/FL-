@@ -7,8 +7,8 @@ import utils_data as md
 def get_models(type):
     if type == "FRFLO":
         return [
-            # { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
-            # { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
         ]
     elif type == "FRALL1":
@@ -20,15 +20,24 @@ def get_models(type):
         ]
     else: return []
 
+c1p = 2
+
 def print_results(execc, typ = "pt"): 
     print("0<60_1>60__0<23_1<60_2<93_3>93  ")
-    for i in range(20): 
+    for i in range(40): 
         # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
-    
-        promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0])  
-        promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
-        print(promp)
+
+        # algorithm to check the probs of the pred.
+        # .. 
+
+        # check concitions - only when diff > 3 
+        # gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[c1p]["pt"][1][i][1]  )
+        gt3 = 1;
+        if gt3 == 1:  
+            promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
+            promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
+            print(promp)
 
 def print_pred( ex , typ, i  ): 
     promp =  "_____________" + ex["dt"] 

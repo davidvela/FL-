@@ -87,14 +87,26 @@ def c4(df, rv=1):
     #     elif( df == [0,0,0,1] ):        return 3  
 def cN(df):
     global nout
-    listofzeros = [0] * nout
-    dfIndex = df #//nRange
+    lz = [0] * nout
+    i = df #//nRange
     # print('{} and {}', (df,dfIndex))
-    if    0 < dfIndex < nout:   listofzeros[dfIndex] = 1
-    elif  dfIndex < 0:          listofzeros[0]       = 1
-    elif  dfIndex >= nout:      listofzeros[nout-1]  = 1
     
-    return listofzeros 
+    if    0 < i < nout:   lz[i]  = 1 
+    elif  i < 0:          lz[0]  = 1  
+    elif  i >= nout:      lz[-1] = 1
+    
+    # if i  >nout: i = nout-1
+    # elif i < 0: i = 0 
+    # for j in range(i-1, i+1): cN1(i,df)    
+
+    return lz 
+
+def cN1(i, df): 
+    val = 1 if i = 1 else 0.5
+    if    0 < df < nout:   lz[i]  = 1  # lz[i]  = 1 
+    elif  df < 0:          lz[0]  = 1  
+    elif  df >= nout:      lz[-1] = 1
+    
 
 # Maybe I can do this with hot-encoder in sckitlearn
 def cc(x, rv=1):
