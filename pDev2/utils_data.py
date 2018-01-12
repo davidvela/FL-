@@ -102,7 +102,7 @@ def cN(df):
     return lz 
 
 def cN1(i, df): 
-    val = 1 if i = 1 else 0.5
+    val = 1 if i == 1 else 0.5
     if    0 < df < nout:   lz[i]  = 1  # lz[i]  = 1 
     elif  df < 0:          lz[0]  = 1  
     elif  df >= nout:      lz[-1] = 1

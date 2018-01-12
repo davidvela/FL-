@@ -20,8 +20,6 @@ def get_models(type):
         ]
     else: return []
 
-c1p = 2
-
 def print_results(execc, typ = "pt"): 
     print("0<60_1>60__0<23_1<60_2<93_3>93  ")
     for i in range(40): 
@@ -32,12 +30,15 @@ def print_results(execc, typ = "pt"):
         # .. 
 
         # check concitions - only when diff > 3 
-        # gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[c1p]["pt"][1][i][1]  )
+        # gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][1]  )
         gt3 = 1;
         if gt3 == 1:  
-            promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
-            promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
-            print(promp)
+            print_line(execc, i, typ)
+
+def print_line(execc, i, typ = "pt"): 
+    promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
+    promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
+    print(promp)
 
 def print_pred( ex , typ, i  ): 
     promp =  "_____________" + ex["dt"] 
