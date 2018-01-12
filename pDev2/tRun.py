@@ -22,7 +22,11 @@ def get_models(type):
 
 def print_results(execc, typ = "pt"): 
     print("0<60_1>60__0<23_1<60_2<93_3>93  ")
-    for i in range(40): 
+    #open file 
+    file = md.LOGDAT + md.DESC + "/_logs_tr2.txt"
+    f = open(file, 'w')
+        
+    for i in range(len(md.dsp)): #40
         # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
 
@@ -30,24 +34,31 @@ def print_results(execc, typ = "pt"):
         # .. 
 
         # check concitions - only when diff > 3 
-        # gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][1]  )
-        gt3 = 1;
-        if gt3 == 1:  
-            print_line(execc, i, typ)
+        gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][1]  )
+        # gt3 = 1;
+        # if gt3 == 1:  
+        line = print_line(execc, i, typ)
+        print(line )
+        f.write(line + "\t " +  str(gt3)  + "\n")
+
+    
+    #close file 
+    f.close()
 
 def print_line(execc, i, typ = "pt"): 
-    promp = "m:{0:15} - R-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
+    promp = "m:{0:15} \tR-{1:5}   \t||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
     promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
-    print(promp)
+    return(promp)
 
 def print_pred( ex , typ, i  ): 
     promp =  "_____________" + ex["dt"] 
+    # promp =  "\t" + ex["dt"] 
     if ex["dt"] == "C1": return promp + "{0}".format(ex[typ][1][i])
     else: return promp + "{0:2}".format(ex[typ][1][i][0])
 
 def mainRun(): 
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_" ;  md.DESC = "FRFLO";  # FRFLO   FRALL1
+    final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1
     ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
     execc = get_models(md.DESC)
