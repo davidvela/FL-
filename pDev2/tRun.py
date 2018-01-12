@@ -27,6 +27,7 @@ def print_results(execc, typ = "pt"):
     f = open(file, 'w')
         
     for i in range(len(md.dsp)): #40
+    # for i in range(5): #40
         # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
 
@@ -34,12 +35,12 @@ def print_results(execc, typ = "pt"):
         # .. 
 
         # check concitions - only when diff > 3 
-        gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][1]  )
+        gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][0]  )
         # gt3 = 1;
-        # if gt3 == 1:  
-        line = print_line(execc, i, typ)
-        print(line )
-        f.write(line + "\t " +  str(gt3)  + "\n")
+        if gt3 == 1:  
+            line = print_line(execc, i, typ)
+            print(line )
+            f.write(line + "\t " +  str(gt3)  + "\n")
 
     
     #close file 
