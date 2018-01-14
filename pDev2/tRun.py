@@ -36,11 +36,11 @@ def print_results(execc, typ = "pt"):
 
         # check concitions - only when diff > 3 
         gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][0]  )
-        # gt3 = 1;
-        if gt3 == 1:  
-            line = print_line(execc, i, typ)
-            print(line )
-            f.write(line + "\t " +  str(gt3)  + "\n")
+        # if gt3 == 1:  
+        line = print_line(execc, i, typ)
+        print(line )
+        
+        f.write(line + "\t " +  str(gt3)  + "\n")
 
     
     #close file 
