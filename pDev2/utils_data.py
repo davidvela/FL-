@@ -228,6 +228,7 @@ def getnn():
     return ninp, nout, top_k
 
 def check_perf_CN(predv, dataEv, sk_ev=False, sf = True ):
+    global dType
     gt3 = 0; gtM = 0; 
     # predvList = predv.tolist()
     # assert(len(predv) == len(dataEv['label']))
@@ -240,13 +241,13 @@ def check_perf_CN(predv, dataEv, sk_ev=False, sf = True ):
             if sf: pred_v = predv[1][i][0]
             else: pred_v = predv[i]
             data_v = dataEv[i] if sk_ev  else dc( dataEv[i])
-            gt3, gtM = tuple(map(operator.add, (gt3, gtM), comp_perf(data_v, pred_v  )))
+            gt3, gtM = tuple(map(operator.add, (gt3, gtM), comp_perf(data_v, pred_v, dType )))
         
         except: print("error: i={}, pred={}, data={} -- ".format(i, pred_v, data_v))
     print("Total: {} GT3: {}  GTM: {}".format(len(predv[1]), gt3, gtM)) 
     return gt3, gtM 
 
-def comp_perf( val, pred): 
+def comp_perf( val, pred, dType='C1'): 
     gt3 = 0; gtM = 0;     
     if   dType == 'C4' and pred != val:  gt3=gtM=gtM+1
     elif dType == 'C2' and pred != val:  gt3=gtM=gtM+1

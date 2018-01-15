@@ -38,7 +38,7 @@ def print_results(execc, typ = "pt"):
         gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][0]  )
         # if gt3 == 1:  
         line = print_line(execc, i, typ)
-        print(line )
+        # print(line )
         
         f.write(line + "\t " +  str(gt3)  + "\n")
 
