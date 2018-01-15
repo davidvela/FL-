@@ -46,7 +46,9 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
     print("___Log recorded")    
 
 # NETWORK GAN -----------------------------------------------------
+                             # -> not used variables    
 def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=128):
+    is_train=False
     with tf.variable_scope('generator', reuse=reuse):
         # First fully connected layer
         x1 = tf.layers.dense(z, h[0], use_bias=False, activation=None )
@@ -57,11 +59,12 @@ def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=12
         x2 = tf.layers.batch_normalization(x2, training=is_train)
         h1 = tf.nn.relu(x2)
         # h1 = tf.nn.dropout(x2, kp)
-        out = tf.layers.dense( h1, nout, use_bias=False, activation=None )
+        out = tf.layers.dense( h1, output_dim, use_bias=False, activation=None )
         return out   
     
-extra_class = 0        
+extra_class = 0                   # -> not used variables    YES!
 def discriminator(x, reuse=False, alpha=0.2, drop_rate=0., num_classes=10, size_mult=64):
+    is_train=False
     with tf.variable_scope('discriminator', reuse=reuse):
         # First fully connected layer
         x1 = tf.layers.dense(x, h[0], use_bias=False, activation=None )
@@ -72,7 +75,8 @@ def discriminator(x, reuse=False, alpha=0.2, drop_rate=0., num_classes=10, size_
         x2 = tf.layers.batch_normalization(x2, training=is_train)
         h1 = tf.nn.relu(x2)
         # h1 = tf.nn.dropout(x2, kp)
-        class_logits  = tf.layers.dense( h1, nout+extra_class, use_bias=False, activation=None )
+        features = x
+        class_logits  = tf.layers.dense( h1, num_classes+extra_class, use_bias=False, activation=None )
         # out = tf.layers.batch_normalization(out, training=is_train)
         # out = tf.nn.relu(out)
         # out = tf.nn.dropout(out, kp)
@@ -92,19 +96,43 @@ def discriminator(x, reuse=False, alpha=0.2, drop_rate=0., num_classes=10, size_
         return out, class_logits, gan_logits, features
         
 def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, alpha=0.2, drop_rate=0.):
-    g_size_mult = 32
-    d_size_mult = 64
-    
+    g_size_mult = 32  # NOT USED
+    d_size_mult = 64  # NOT USED
+    # run gen and disc
     g_model = generator(input_z, output_dim, alpha=alpha, size_mult=g_size_mult)
-    d_on_data = discriminator(input_real, alpha=alpha, drop_rate=drop_rate, size_mult=d_size_mult)
+    d_on_data = discriminator(input_real, num_classes=num_classes, alpha=alpha, drop_rate=drop_rate, size_mult=d_size_mult)
     d_model_real, class_logits_on_data, gan_logits_on_data, data_features = d_on_data
-    d_on_samples = discriminator(g_model, reuse=True, alpha=alpha, drop_rate=drop_rate, size_mult=d_size_mult)
+    
+    d_on_samples = discriminator(g_model,num_classes=num_classes, reuse=True, alpha=alpha, drop_rate=drop_rate, size_mult=d_size_mult)
     d_model_fake, class_logits_on_samples, gan_logits_on_samples, sample_features = d_on_samples
     
+    # compute the losses. 
+    d_loss_real = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(logits=gan_logits_on_data,
+                                                labels=tf.ones_like(gan_logits_on_data)))
+    d_loss_fake = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(logits=gan_logits_on_samples,
+                                                labels=tf.zeros_like(gan_logits_on_samples)))
+    y = tf.squeeze(y)
+    class_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=class_logits_on_data,
+                                                                  labels=tf.one_hot(y, num_classes + extra_class,
+                                                                  dtype=tf.int32))
+    class_cross_entropy = tf.squeeze(class_cross_entropy)
+    label_mask = tf.squeeze(tf.to_float(label_mask))
+    d_loss_class = tf.reduce_sum(label_mask * class_cross_entropy) / tf.maximum(1., tf.reduce_sum(label_mask))
+    d_loss = d_loss_class + d_loss_real + d_loss_fake
     
-    
-    
-    
+    # set `g_loss` to the "feature matching" loss invented by Tim Salimans at OpenAI
+    data_moments = tf.reduce_mean(data_features, axis=0)
+    sample_moments = tf.reduce_mean(sample_features, axis=0)
+    g_loss = tf.reduce_mean(tf.abs(data_moments - sample_moments))
+
+    pred_class = tf.cast(tf.argmax(class_logits_on_data, 1), tf.int32)
+    eq = tf.equal(tf.squeeze(y), pred_class)
+    correct = tf.reduce_sum(tf.to_float(eq))
+    masked_correct = tf.reduce_sum(label_mask * tf.to_float(eq))
+
+
     return d_loss, g_loss, correct, masked_correct, g_model
 
 def model_opt(d_loss, g_loss, learning_rate, beta1):
@@ -119,19 +147,22 @@ def model_opt(d_loss, g_loss, learning_rate, beta1):
     return d_train_opt, g_train_opt, shrink_lr
 
 class GAN:
-    def __init__(self, real_size, z_size, learning_rate, num_classes=10, alpha=0.2, beta1=0.5):
+    def __init__(self, ninp, nout, top_k,  learning_rate, num_classes=10, alpha=0.2, beta1=0.5):
         tf.reset_default_graph()
         
         self.learning_rate = tf.Variable(learning_rate, trainable=False)
-        self.input_real, self.input_z, self.y, self.label_mask = model_inputs(real_size, z_size)
-        self.drop_rate = tf.placeholder_with_default(.5, (), "drop_rate")
+        # self.input_real, self.input_z, self.y, self.label_mask = model_inputs(real_size, z_size)        
+        self.input_real    = tf.placeholder(tf.float32,   shape=[None, ninp], name="input_real")
+        self.input_z       = tf.placeholder(tf.float32,   shape=[None, ninp], name="input_z")
+        self.y              = tf.placeholder(tf.int32,    shape=[None, nout], name="y")
+        self.label_mask     = tf.placeholder(tf.int32,    (None),             name='label_mask')
+        self.drop_rate      = tf.placeholder_with_default(.5, (), "drop_rate")
         
-        loss_results = model_loss(self.input_real, self.input_z,
-                                    real_size[2], self.y, num_classes, label_mask=self.label_mask, alpha=0.2,
-                                    drop_rate=self.drop_rate) 
+
+        loss_results = model_loss(self.input_real, self.input_z, ninp, self.y, nout, 
+            label_mask=self.label_mask, alpha=0.2, drop_rate=self.drop_rate) 
         
         self.d_loss, self.g_loss, self.correct, self.masked_correct, self.samples = loss_results       
-        
         self.d_opt, self.g_opt, self.shrink_lr = model_opt(self.d_loss, self.g_loss, self.learning_rate, beta1)
         
 
@@ -172,7 +203,6 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         tf.summary.scalar("accuracy", accuracy)
 
     return out, accuracy, softmaxT
-
 def build_network3():
     tf.reset_default_graph()
 
@@ -192,12 +222,10 @@ def build_network3():
         optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
     summ = tf.summary.merge_all()
     saver= tf.train.Saver()
-
 def restore_model(sess):   
     saver= tf.train.Saver() 
     print("Model restored from file: %s" % model_path)
     saver.restore(sess, model_path)
-
 def build_network1( ):
     # Simple NN - 2layers - matmul 
     biases  = { 'b1': tf.Variable(tf.random_normal( [ h[0] ]),        name="Bias_1"),
@@ -240,6 +268,73 @@ def old():
     saver= tf.train.Saver()
 
 # OPERATIONS-----------------------------------------------------
+def get_input_z(): 
+    sample_z = np.random.normal(0, 1, size=(ninp))
+    mask_z = np.random.randint(2, size=ninp) ; sample_z= sample_z*mask_z
+    return sample_z
+
+def trainG(it = 100, disp=50, batch_size = 128, compt = False): 
+    print("____TRAINING...")
+    display_step =  disp 
+
+    # dataTest = {'label' : [] , 'data' :  [] };
+    
+    print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
+    total_batch  = int(len(md.dataT['label']) / batch_size)   
+    startTime = datetime.now().strftime('%H:%M:%S')
+
+    saver = tf.train.Saver()
+    sample_z = get_input_z()
+   
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        # restore_model(sess)  #Run if I want to retrain an existing model  
+        writer = tf.summary.FileWriter(md.MODEL_DIR + "tboard/", sess.graph ) # + get_hpar() )
+
+        start = time.time()
+        for i in range(it):            
+            num_examples = 0; num_correct = 0;
+            for ii, (xtb,ytb) in enumerate(md.get_batches(batch_size) ):
+                # xtb, ytb = dc.next_batch(batch_size, dataT['data'], dataT['label'])
+                _, _, correct = sess.run([net.d_opt, net.g_opt, net.masked_correct],
+                                         feed_dict={net.input_real: x, net.input_z: batch_z,
+                                                    net.y : y, net.label_mask : label_mask }) 
+                num_correct += correct
+                num_examples += batch_size
+               if ii % display_step ==0: #record_step == 0:
+                    train_accuracy = num_correct / float(num_examples)
+                    print("\t\tClassifier train accuracy: ", train_accuracy)
+            
+            num_examples = 0; num_correct = 0;
+            assert 'int' in str(y.dtype)
+            num_examples = md.spn
+            correct = sess.run( [net.correct], 
+                feed_dict={ net.input_real: md.dst.iloc[:md.spn, 3:],  
+                            y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist(),
+                            net.drop_rate: 0. })
+            num_correct += correct
+            print("E Ac:", ev_ac)
+            
+            correct = sess.run( [net.correct], 
+                feed_dict={ x: md.dst.iloc[md.spn:, 3:],  
+                            y: md.dst.loc[md.spn:,'FP_P'].as_matrix().tolist()   })
+            tr_ac = str( train_accuracy )[:5] 
+            print("T Ac:", tr_ac)
+
+            train_accuracies.append(train_accuracy)
+            test_accuracies.append(ev_ac)
+
+            gen_samples = sess.run( net.samples, feed_dict={net.input_z: sample_z})
+            
+
+        save_path = saver.save(sess, model_path)
+        print("Model saved in file: %s" % save_path) 
+    print("Optimization Finished!")
+
+    logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
+    logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
+    dataTest = {'label' : [] , 'data' :  [] };
+    
 def train(it = 100, disp=50, batch_size = 128, compt = False): 
     print("____TRAINING...")
     display_step =  disp 
@@ -248,8 +343,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     if compt: 
         md.get_columns(pp_excel = True )  #md.dsc or dataset? 
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
-
-        
+       
     print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
     total_batch  = int(len(md.dataT['label']) / batch_size)   
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -384,9 +478,9 @@ def vis_chart( ):
     return
 
 
-md.DESC      = "FRALL1" # "FREXP"  FRFLO
+md.DESC      = "FRFLO" # "FREXP"  FRFLO
 md.spn       = 10000  
-md.dType     = "C0" #C1, C2, C4, C0
+md.dType     = "C4" #C1, C2, C4, C0
 epochs       = 100 #100
 
 lr           = 0.001 #0.0001
@@ -418,7 +512,10 @@ def mainRun():
     #---------------------------------------------------------------
     # NETWORK
     #---------------------------------------------------------------
-    build_network3()
+    # build_network3()
+    net = GAN(ninp, nout, top_k, lr)
+
+
     print(model_path)
     print( get_nns() )
     clean_traina()
@@ -426,12 +523,12 @@ def mainRun():
     #---------------------------------------------------------------
     # OP.                           comp. 
     #---------------------------------------------------------------
+    # train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size, figsize=(10,5))
+    # train(epochs, disp, batch_size, True)
+    # evaluate( )
+    # tests(url_test, p_col=False  )
+    # vis_chart( )
 
-    train(epochs, disp, batch_size, True)
-    evaluate( )
-    
-    tests(url_test, p_col=False  )
-    vis_chart( )
     print("___The end!")
 
 if __name__ == '__main__':

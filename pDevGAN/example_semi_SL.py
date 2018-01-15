@@ -2,18 +2,11 @@
 # coding: utf-8
 
 # In this notebook, we'll learn how to use GANs to do semi-supervised learning.
-# 
 # In supervised learning, we have a training set of inputs $x$ and class labels $y$. We train a model that takes $x$ as input and gives $y$ as output.
-# 
 # In semi-supervised learning, our goal is still to train a model that takes $x$ as input and generates $y$ as output. However, not all of our training examples have a label $y$. We need to develop an algorithm that is able to get better at classification by studying both labeled $(x, y)$ pairs and unlabeled $x$ examples.
-# 
 # To do this for the SVHN dataset, we'll turn the GAN discriminator into an 11 class discriminator. It will recognize the 10 different classes of real SVHN digits, as well as an 11th class of fake images that come from the generator. The discriminator will get to train on real labeled images, real unlabeled images, and fake images. By drawing on three sources of data instead of just one, it will generalize to the test set much better than a traditional classifier trained on only one source of data.
-
 # In[1]:
-
-
 get_ipython().magic('matplotlib inline')
-
 import pickle as pkl
 import time
 
@@ -29,26 +22,15 @@ import tensorflow as tf
 # n independent logits to specify a probability distribution over n + 1 categories.
 # We implemented both solutions here.
 extra_class = 0
-
-
 # In[2]:
-
-
 get_ipython().system('mkdir data')
-
-
 # In[3]:
-
-
 from urllib.request import urlretrieve
 from os.path import isfile, isdir
 from tqdm import tqdm
-
 data_dir = 'data/'
-
 if not isdir(data_dir):
     raise Exception("Data directory doesn't exist!")
-
 class DLProgress(tqdm):
     last_block = 0
 
@@ -56,14 +38,12 @@ class DLProgress(tqdm):
         self.total = total_size
         self.update((block_num - self.last_block) * block_size)
         self.last_block = block_num
-
 if not isfile(data_dir + "train_32x32.mat"):
     with DLProgress(unit='B', unit_scale=True, miniters=1, desc='SVHN Training Set') as pbar:
         urlretrieve(
             'http://ufldl.stanford.edu/housenumbers/train_32x32.mat',
             data_dir + 'train_32x32.mat',
             pbar.hook)
-
 if not isfile(data_dir + "test_32x32.mat"):
     with DLProgress(unit='B', unit_scale=True, miniters=1, desc='SVHN Training Set') as pbar:
         urlretrieve(
@@ -71,17 +51,10 @@ if not isfile(data_dir + "test_32x32.mat"):
             data_dir + 'test_32x32.mat',
             pbar.hook)
 
-
 # In[4]:
-
-
 trainset = loadmat(data_dir + 'train_32x32.mat')
 testset = loadmat(data_dir + 'test_32x32.mat')
-
-
 # In[5]:
-
-
 idx = np.random.randint(0, trainset['X'].shape[3], size=36)
 fig, axes = plt.subplots(6, 6, sharex=True, sharey=True, figsize=(5,5),)
 for ii, ax in zip(idx, axes.flatten()):
@@ -90,10 +63,7 @@ for ii, ax in zip(idx, axes.flatten()):
     ax.yaxis.set_visible(False)
 plt.subplots_adjust(wspace=0, hspace=0)
 
-
 # In[6]:
-
-
 def scale(x, feature_range=(-1, 1)):
     # scale to (0, 1)
     x = ((x - x.min())/(255 - x.min()))
@@ -102,11 +72,7 @@ def scale(x, feature_range=(-1, 1)):
     min, max = feature_range
     x = x * (max - min) + min
     return x
-
-
 # In[7]:
-
-
 class Dataset:
     def __init__(self, train, test, val_frac=0.5, shuffle=True, scale_func=None):
         split_idx = int(len(test['y'])*(1 - val_frac))
@@ -159,11 +125,7 @@ class Dataset:
                 yield x, y, self.label_mask[ii:ii+batch_size]
             else:
                 yield x, y
-
-
 # In[8]:
-
-
 def model_inputs(real_dim, z_dim):
     inputs_real = tf.placeholder(tf.float32, (None, *real_dim), name='input_real')
     inputs_z = tf.placeholder(tf.float32, (None, z_dim), name='input_z')
@@ -172,10 +134,7 @@ def model_inputs(real_dim, z_dim):
     
     return inputs_real, inputs_z, y, label_mask
 
-
 # In[9]:
-
-
 def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=128):
     with tf.variable_scope('generator', reuse=reuse):
         # First fully connected layer
@@ -199,11 +158,7 @@ def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=12
         out = tf.tanh(logits)
         
         return out
-
-
 # In[10]:
-
-
 def discriminator(x, reuse=False, alpha=0.2, drop_rate=0., num_classes=10, size_mult=64):
     with tf.variable_scope('discriminator', reuse=reuse):
         x = tf.layers.dropout(x, rate=drop_rate/2.5)
@@ -281,11 +236,7 @@ def discriminator(x, reuse=False, alpha=0.2, drop_rate=0., num_classes=10, size_
         out = tf.nn.softmax(class_logits)
         
         return out, class_logits, gan_logits, features
-
-
 # In[11]:
-
-
 def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, alpha=0.2, drop_rate=0.):
     """
     Get the loss for the discriminator and generator
@@ -350,11 +301,7 @@ def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, alph
     masked_correct = tf.reduce_sum(label_mask * tf.to_float(eq))
     
     return d_loss, g_loss, correct, masked_correct, g_model
-
-
 # In[12]:
-
-
 def model_opt(d_loss, g_loss, learning_rate, beta1):
     """
     Get optimization operations
@@ -377,11 +324,7 @@ def model_opt(d_loss, g_loss, learning_rate, beta1):
     shrink_lr = tf.assign(learning_rate, learning_rate * 0.9)
     
     return d_train_opt, g_train_opt, shrink_lr
-
-
 # In[13]:
-
-
 class GAN:
     """
     A GAN model.
@@ -407,10 +350,7 @@ class GAN:
         
         self.d_opt, self.g_opt, self.shrink_lr = model_opt(self.d_loss, self.g_loss, self.learning_rate, beta1)
 
-
 # In[14]:
-
-
 def view_samples(epoch, samples, nrows, ncols, figsize=(5,5)):
     fig, axes = plt.subplots(figsize=figsize, nrows=nrows, ncols=ncols, 
                              sharey=True, sharex=True)
@@ -422,11 +362,7 @@ def view_samples(epoch, samples, nrows, ncols, figsize=(5,5)):
    
     plt.subplots_adjust(wspace=0, hspace=0)
     return fig, axes
-
-
 # In[15]:
-
-
 def train(net, dataset, epochs, batch_size, figsize=(5,5)):
     
     saver = tf.train.Saver()
@@ -484,9 +420,7 @@ def train(net, dataset, epochs, batch_size, figsize=(5,5)):
             print("\t\tEpoch time: ", t2e - t1e)
             
             
-            gen_samples = sess.run(
-                                   net.samples,
-                                   feed_dict={net.input_z: sample_z})
+            gen_samples = sess.run( net.samples, feed_dict={net.input_z: sample_z})
             samples.append(gen_samples)
             _ = view_samples(-1, samples, 5, 10, figsize=figsize)
             plt.show()
@@ -503,16 +437,9 @@ def train(net, dataset, epochs, batch_size, figsize=(5,5)):
         pkl.dump(samples, f)
     
     return train_accuracies, test_accuracies, samples
-
-
 # In[16]:
-
-
 get_ipython().system('mkdir checkpoints')
-
-
 # In[17]:
-
 
 real_size = (32,32,3)
 z_size = 100
@@ -520,54 +447,30 @@ learning_rate = 0.0003
 
 net = GAN(real_size, z_size, learning_rate)
 
-
 # In[ ]:
-
-
 dataset = Dataset(trainset, testset)
-
 batch_size = 128
 epochs = 25
 train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size, figsize=(10,5))
-
-
 # In[19]:
-
-
 fig, ax = plt.subplots()
 plt.plot(train_accuracies, label='Train', alpha=0.5)
 plt.plot(test_accuracies, label='Test', alpha=0.5)
 plt.title("Accuracy")
 plt.legend()
 
-
 # When you run the fully implemented semi-supervised GAN, you should usually find that the test accuracy peaks a little above 71%. It should definitely stay above 70% fairly consistently throughout the last several epochs of training.
-# 
 # This is a little bit better than a [NIPS 2014 paper](https://arxiv.org/pdf/1406.5298.pdf) that got 64% accuracy on 1000-label SVHN with variational methods. However, we still have lost something by not using all the labels. If you re-run with all the labels included, you should obtain over 80% accuracy using this architecture (and other architectures that take longer to run can do much better).
-
-# In[20]:
-
-
+# In[20]
 _ = view_samples(-1, samples, 5, 10, figsize=(10,5))
-
-
 # In[21]:
-
-
 get_ipython().system('mkdir images')
-
-
 # In[22]:
-
-
 for ii in range(len(samples)):
     fig, ax = view_samples(ii, samples, 5, 10, figsize=(10,5))
     fig.savefig('images/samples_{:03d}.png'.format(ii))
     plt.close()
-
-
 # Congratulations! You now know how to train a semi-supervised GAN. This exercise is stripped down to make it run faster and to make it simpler to implement. In the original work by Tim Salimans at OpenAI, a GAN using [more tricks and more runtime](https://arxiv.org/pdf/1606.03498.pdf) reaches over 94% accuracy using only 1,000 labeled examples.
-
 # In[ ]:
 
 

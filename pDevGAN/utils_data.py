@@ -468,26 +468,11 @@ def split_data():
 
     #control split - I need more information... 
 
-def print_formulation(ds):
-    # print(ds.iloc[ds.nonzero()])
-    print(*ds.iloc[ds.nonzero()].index) # in 1 line
-    print(*ds.iloc[ds.nonzero()])       # in 1 line
-    
-    print("N. of components: {}".format(len(ds.iloc[ds.nonzero()])  ))
-
-
-
-
 def main(): 
     print("hi1")
     #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    # testsJ2(excel=True, split = False, pTest = False)
-
-    url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
-    force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
-    get_tests(url_test, force, excel )
-    print_formulation( dsp.iloc[2]  )
+    testsJ2(excel=True, split = False, pTest = False)
 
 if __name__ == '__main__':
     main()

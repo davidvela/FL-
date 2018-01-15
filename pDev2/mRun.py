@@ -294,7 +294,7 @@ def vis_chart( ):
 
 md.DESC      = "FRALL1" # "FREXP"  FRFLO
 md.spn       = 10000  
-md.dType     = "C0" #C1, C2, C4, C0
+md.dType     = "C1" #C1, C2, C4, C0
 epochs       = 100 #100
 
 lr           = 0.001 #0.0001
