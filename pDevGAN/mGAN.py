@@ -14,6 +14,7 @@ from types import *
 from collections import Counter
 from datetime import datetime
 import utils_data as md
+import pickle as pkl
 
 def get_nns(): 
     #nns =  str(ninp)+'*'+str(h[0])+'*'+str(h[1])+'*'+str(nout)
@@ -113,6 +114,13 @@ def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, alph
     d_loss_fake = tf.reduce_mean(
         tf.nn.sigmoid_cross_entropy_with_logits(logits=gan_logits_on_samples,
                                                 labels=tf.zeros_like(gan_logits_on_samples)))
+    # # simple GAN - generator:
+    # d_loss = d_loss_real + d_loss_fake
+    # g_loss = tf.reduce_mean(
+    #     tf.nn.sigmoid_cross_entropy_with_logits( logits=d_logits_fake, labels=tf.ones_like(d_model_fake)  ))
+    # return d_loss, g_loss
+
+    # semi-supervised                                            
     y = tf.squeeze(y)
     class_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=class_logits_on_data,
                                                                   labels=tf.one_hot(y, num_classes + extra_class,
@@ -145,7 +153,7 @@ def model_opt(d_loss, g_loss, learning_rate, beta1):
     g_train_opt = tf.train.AdamOptimizer(learning_rate, beta1=beta1).minimize(g_loss, var_list=g_vars)
     shrink_lr = tf.assign(learning_rate, learning_rate * 0.9)
     return d_train_opt, g_train_opt, shrink_lr
-
+z_size = 100
 class GAN:
     def __init__(self, ninp, nout, top_k,  learning_rate, num_classes=10, alpha=0.2, beta1=0.5):
         tf.reset_default_graph()
@@ -153,7 +161,7 @@ class GAN:
         self.learning_rate = tf.Variable(learning_rate, trainable=False)
         # self.input_real, self.input_z, self.y, self.label_mask = model_inputs(real_size, z_size)        
         self.input_real    = tf.placeholder(tf.float32,   shape=[None, ninp], name="input_real")
-        self.input_z       = tf.placeholder(tf.float32,   shape=[None, ninp], name="input_z")
+        self.input_z       = tf.placeholder(tf.float32,   shape=[None, z_size], name="input_z")
         self.y              = tf.placeholder(tf.int32,    shape=[None, nout], name="y")
         self.label_mask     = tf.placeholder(tf.int32,    (None),             name='label_mask')
         self.drop_rate      = tf.placeholder_with_default(.5, (), "drop_rate")
@@ -269,8 +277,9 @@ def old():
 
 # OPERATIONS-----------------------------------------------------
 def get_input_z(): 
-    sample_z = np.random.normal(0, 1, size=(ninp))
-    mask_z = np.random.randint(2, size=ninp) ; sample_z= sample_z*mask_z
+    sample_z = np.random.normal(0, 1, size=(z_size))
+    # sample_z = np.random.normal(0, 1, size=(ninp))
+    # mask_z = np.random.randint(2, size=ninp) ; sample_z= sample_z*mask_z
     return sample_z
 
 def trainG(it = 100, disp=50, batch_size = 128, compt = False): 
@@ -296,9 +305,14 @@ def trainG(it = 100, disp=50, batch_size = 128, compt = False):
             num_examples = 0; num_correct = 0;
             for ii, (xtb,ytb) in enumerate(md.get_batches(batch_size) ):
                 # xtb, ytb = dc.next_batch(batch_size, dataT['data'], dataT['label'])
+                batch_z = get_input_z()
+
                 _, _, correct = sess.run([net.d_opt, net.g_opt, net.masked_correct],
-                                         feed_dict={net.input_real: x, net.input_z: batch_z,
-                                                    net.y : y, net.label_mask : label_mask }) 
+                                         feed_dict={net.input_real: xtb, 
+                                                    net.input_z: batch_z,
+                                                    net.y : ytb
+                                                    #,  net.label_mask : label_mask # mask to pretend to have unlabelled data
+                                        }) 
                 num_correct += correct
                 num_examples += batch_size
                if ii % display_step ==0: #record_step == 0:
@@ -313,28 +327,36 @@ def trainG(it = 100, disp=50, batch_size = 128, compt = False):
                             y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist(),
                             net.drop_rate: 0. })
             num_correct += correct
+            ev_ac = num_correct / float(num_examples)
             print("E Ac:", ev_ac)
             
             correct = sess.run( [net.correct], 
                 feed_dict={ x: md.dst.iloc[md.spn:, 3:],  
                             y: md.dst.loc[md.spn:,'FP_P'].as_matrix().tolist()   })
-            tr_ac = str( train_accuracy )[:5] 
+            tr_ac = num_correct / float(len(md.dst.iloc[md.spn:, 3:]))
             print("T Ac:", tr_ac)
 
             train_accuracies.append(train_accuracy)
             test_accuracies.append(ev_ac)
 
             gen_samples = sess.run( net.samples, feed_dict={net.input_z: sample_z})
-            
+            samples.append(gen_samples)
+
 
         save_path = saver.save(sess, model_path)
         print("Model saved in file: %s" % save_path) 
     print("Optimization Finished!")
 
-    logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
-    logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
+    # logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
+    # logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
     dataTest = {'label' : [] , 'data' :  [] };
     
+    with open('samples.pkl', 'wb') as f:
+        pkl.dump(samples, f)
+    
+    return train_accuracies, test_accuracies, samples
+
+
 def train(it = 100, disp=50, batch_size = 128, compt = False): 
     print("____TRAINING...")
     display_step =  disp 
@@ -464,8 +486,8 @@ def tests(url_test = 'url', p_col=False):
     return sf
 
 def clean_traina():
-    global train_accuracies, test_accuracies
-    train_accuracies, test_accuracies = [], []
+    global train_accuracies, test_accuracies, samples
+    train_accuracies, test_accuracies, samples = [], [], []
     
 def vis_chart( ):
     fig, ax = plt.subplots()
@@ -523,7 +545,7 @@ def mainRun():
     #---------------------------------------------------------------
     # OP.                           comp. 
     #---------------------------------------------------------------
-    # train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size, figsize=(10,5))
+    train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size, figsize=(10,5))
     # train(epochs, disp, batch_size, True)
     # evaluate( )
     # tests(url_test, p_col=False  )
