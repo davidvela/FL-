@@ -45,7 +45,10 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
 
     f.write(line);  f.close()
     print("___Log recorded")    
-
+def clean_traina():
+    global train_accuracies, test_accuracies, samples
+    train_accuracies, test_accuracies, samples = [], [], []
+    
 # NETWORK GAN -----------------------------------------------------
                              # -> not used variables    
 def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=128):
@@ -135,11 +138,17 @@ def model_loss(input_real, input_z, output_dim, y, num_classes, label_mask, alph
     sample_moments = tf.reduce_mean(sample_features, axis=0)
     g_loss = tf.reduce_mean(tf.abs(data_moments - sample_moments))
 
+    
     pred_class = tf.cast(tf.argmax(class_logits_on_data, 1), tf.int32)
-    eq = tf.equal(tf.squeeze(y), pred_class)
-    correct = tf.reduce_sum(tf.to_float(eq))
+    # eq = tf.equal(tf.squeeze(y), pred_class)                                # GAN
+    eq = tf.equal(tf.argmax(class_logits_on_data, 1), tf.argmax(y, 1))      # CLASS
+    correct = tf.reduce_sum(tf.to_float(eq))                                # GAN 
     masked_correct = tf.reduce_sum(label_mask * tf.to_float(eq))
 
+    # classification 
+    # softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)                       # CLASS
+    # correct = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))                  # CLASS
+    # accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))      # CLASS
 
     return d_loss, g_loss, correct, masked_correct, g_model
 
@@ -282,7 +291,8 @@ def get_input_z():
     # mask_z = np.random.randint(2, size=ninp) ; sample_z= sample_z*mask_z
     return sample_z
 
-def trainG(it = 100, disp=50, batch_size = 128, compt = False): 
+def trainG(net, it = 100, disp=50, batch_size = 128, compt = False): 
+    # def trainG(net, dataset, epochs, batch_size, figsize=(5,5)):
     print("____TRAINING...")
     display_step =  disp 
 
@@ -313,18 +323,19 @@ def trainG(it = 100, disp=50, batch_size = 128, compt = False):
                                                     net.y : ytb
                                                     #,  net.label_mask : label_mask # mask to pretend to have unlabelled data
                                         }) 
-                num_correct += correct
+                print(correct)
+                # num_correct += correct
                 num_examples += batch_size
-               if ii % display_step ==0: #record_step == 0:
+                if ii % display_step ==0: #record_step == 0:
                     train_accuracy = num_correct / float(num_examples)
                     print("\t\tClassifier train accuracy: ", train_accuracy)
             
             num_examples = 0; num_correct = 0;
-            assert 'int' in str(y.dtype)
+            # assert 'int' in str(y.dtype)
             num_examples = md.spn
             correct = sess.run( [net.correct], 
                 feed_dict={ net.input_real: md.dst.iloc[:md.spn, 3:],  
-                            y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist(),
+                            net.y: md.dst.loc[:md.spn-1,'FP_P'].as_matrix().tolist(),
                             net.drop_rate: 0. })
             num_correct += correct
             ev_ac = num_correct / float(num_examples)
@@ -485,10 +496,7 @@ def tests(url_test = 'url', p_col=False):
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     return sf
 
-def clean_traina():
-    global train_accuracies, test_accuracies, samples
-    train_accuracies, test_accuracies, samples = [], [], []
-    
+
 def vis_chart( ):
     fig, ax = plt.subplots()
     plt.plot(train_accuracies, label='Train', alpha=0.5)
@@ -545,7 +553,7 @@ def mainRun():
     #---------------------------------------------------------------
     # OP.                           comp. 
     #---------------------------------------------------------------
-    train_accuracies, test_accuracies, samples = train(net, dataset, epochs, batch_size, figsize=(10,5))
+    train_accuracies, test_accuracies, samples = trainG(net, epochs, disp, batch_size, True  )
     # train(epochs, disp, batch_size, True)
     # evaluate( )
     # tests(url_test, p_col=False  )
