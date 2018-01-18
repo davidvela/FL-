@@ -49,8 +49,7 @@ def clean_traina():
     global train_accuracies, test_accuracies, samples
     train_accuracies, test_accuracies, samples = [], [], []
     
-# NETWORK GAN -----------------------------------------------------
-                             # -> not used variables    
+# NETWORK GAN -------------- # -> not used variables    
 def generator(z, output_dim, reuse=False, alpha=0.2, training=True, size_mult=128):
     is_train=False
     with tf.variable_scope('generator', reuse=reuse):
@@ -290,7 +289,6 @@ def get_input_z():
     # sample_z = np.random.normal(0, 1, size=(ninp))
     # mask_z = np.random.randint(2, size=ninp) ; sample_z= sample_z*mask_z
     return sample_z
-
 def trainG(net, it = 100, disp=50, batch_size = 128, compt = False): 
     # def trainG(net, dataset, epochs, batch_size, figsize=(5,5)):
     print("____TRAINING...")
@@ -367,7 +365,6 @@ def trainG(net, it = 100, disp=50, batch_size = 128, compt = False):
     
     return train_accuracies, test_accuracies, samples
 
-
 def train(it = 100, disp=50, batch_size = 128, compt = False): 
     print("____TRAINING...")
     display_step =  disp 
@@ -425,7 +422,6 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
     logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
     dataTest = {'label' : [] , 'data' :  [] };
-
 def evaluate( ): 
     print("_____EVALUATION...")
     startTime = datetime.now().strftime('%H:%M:%S')
@@ -449,7 +445,6 @@ def evaluate( ):
     gt3, gtM = md.check_perf_CN(softv, md.dst.loc[:md.spn-1,'FP_P'], False)
     logr(  it=epochs, typ='EV', AC=ev_ac,DS=md.DESC, num=md.spn, AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
     return predv.tolist()
-
 def tests(url_test = 'url', p_col=False):  
     print("_____TESTS...")    
     
@@ -496,7 +491,6 @@ def tests(url_test = 'url', p_col=False):
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     return sf
 
-
 def vis_chart( ):
     fig, ax = plt.subplots()
     plt.plot(train_accuracies, label='Train', alpha=0.5)
@@ -506,7 +500,6 @@ def vis_chart( ):
     plt.savefig(md.MODEL_DIR + "chart.png" )
     # plt.show()
     return
-
 
 md.DESC      = "FRFLO" # "FREXP"  FRFLO
 md.spn       = 10000  
