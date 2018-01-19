@@ -318,11 +318,11 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
                         ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
                         col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
                     else: 
-                        col_key = int(key) #str(int(key)) 
+                        col_key = str(int(key)) 
                     df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
-
+        df_entry = df_entry.replace(0, np.nan)
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
     print("Counter of comp. not included :"); print(ccount) # print(len(ccount))
@@ -430,18 +430,18 @@ def testsJ(excel):
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(dataAll['data'], excel)
 
-# ll_st = 0; ll_en=10000; ll_en=20000; 26000; 32000; 38000; 44000; 
-# ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
-ll_st = 0; ll_en = 10;
+# ll_st = 0; ll_en=10000; #ll_en=20000; 26000; 32000; 38000; 44000; 
+ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
+# ll_st = 0; ll_en = 10;
 def testsJ2(excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
-    url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
-    # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    # url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
+    setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest:                                               #   disp   all
-        get_tests(url_test, False, False, dataFile, labelFile, False, True ); tmp = dsp;
+        get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
     else: 
         get_columns(False, False, False); tmp = dsc
     
@@ -478,18 +478,19 @@ def print_formulation(ds):
 
 
 
-def main(): 
+def main1(): 
     print("hi1")
-    #md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    # testsJ2(excel=True, split = False, pTest = False)
+    # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    testsJ2(excel=True, split = False, pTest = True)
 
+def main2():
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     get_tests(url_test, force, excel )
     print_formulation( dsp.iloc[2]  )
 
 if __name__ == '__main__':
-    main()
+    main1()
 
 
