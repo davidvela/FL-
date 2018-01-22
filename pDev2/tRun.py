@@ -80,9 +80,7 @@ def mainRun():
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()
         print(mr.model_path)    
-
         # mr.evaluate( )
-
         ex["pt"] = mr.tests(url_test, p_col=False  )
     
     # PRINTING  ------------------------------------------------ 

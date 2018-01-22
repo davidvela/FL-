@@ -107,7 +107,6 @@ def cN1(i, df):
     elif  df < 0:          lz[0]  = 1  
     elif  df >= nout:      lz[-1] = 1
     
-
 # Maybe I can do this with hot-encoder in sckitlearn
 def cc(x, rv=1):
     global nout
@@ -116,12 +115,15 @@ def cc(x, rv=1):
     elif dType == 'C2':  nout = 2;   return c2(x, rv);
     elif dType == 'C0':  nout = 1;   return [x];
 def dc(df, val = 1 ): 
-    
     if dType == "C0": return df 
     else: 
-        try:    val = df.index(val)
-        except: val = 0    
+        try:
+            val = df.index(val)
+        except: val = 0 
     return val
+
+def get_conv_list(dst): 
+    return  dst.map(lambda x: dc(x, 1)) #dc( dataEv[i])
 
 def read_data2(path): #NOT USED
     pass
@@ -490,7 +492,11 @@ def main2():
     get_tests(url_test, force, excel )
     print_formulation( dsp.iloc[2]  )
 
+def main3(): 
+    mainRead2(ALL_DS, 1, 10, all = False, shuffle = True  ) ; normalize()
+    print(dst["FP_P"])
+    print(get_conv_list(  dst["FP_P"] )) 
 if __name__ == '__main__':
-    main1()
+    main3()
 
 

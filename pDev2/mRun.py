@@ -44,6 +44,10 @@ def logr(datep = '' , time='', it=1000, nn='', typ='TR', DS='', AC=0, num=0, AC3
 
     f.write(line);  f.close()
     print("___Log recorded")    
+def restore_model(sess):   
+    saver= tf.train.Saver() 
+    print("Model restored from file: %s" % model_path)
+    saver.restore(sess, model_path)
 
 # NETWORK-----------------------------------------------------
 def fc(inp, nodes, kp, is_train):
@@ -80,16 +84,18 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         tf.summary.scalar("accuracy", accuracy)
 
     return out, accuracy, softmaxT
-
 def build_network3():
     tf.reset_default_graph()
 
+    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y, confusion
+
     print("build network")
-    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y 
     x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
     # y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
     y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
     prediction, accuracy, softmaxT = build_network2()
+    
+    # confusion = tf.confusion_matrix(labels=y, predictions=prediction, num_classes=nout)
     
     with tf.name_scope("xent"): #loss
         cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
@@ -98,13 +104,9 @@ def build_network3():
     
     with tf.name_scope("train"): #optimizer
         optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
+    
     summ = tf.summary.merge_all()
     saver= tf.train.Saver()
-
-def restore_model(sess):   
-    saver= tf.train.Saver() 
-    print("Model restored from file: %s" % model_path)
-    saver.restore(sess, model_path)
 
 def build_network1( ):
     # Simple NN - 2layers - matmul 
@@ -261,6 +263,14 @@ def tests(url_test = 'url', p_col=False):
         ts_acn, predv, sf = sess.run( [accuracy, prediction, softmaxT], feed_dict={x: dataTest['data'], y: dataTest['label']}) 
         ts_ac = str(ts_acn) 
         print("test ac = {}".format(ts_ac))
+    
+    confusion = tf.confusion_matrix(    labels=md.get_conv_list(  md.dsp["FP_P"] ), 
+                                        predictions=[ sf[1][x][0]  for x in range( len(sf[1]) )   ], 
+                                        num_classes=nout)
+    with tf.Session() as sess:
+        print(sess.run(confusion))
+    
+
     # print(dataTest['label']);     print(sf)
     range_ts = len(predv) if len(predv)<20 else 20
     for i in range( range_ts ):
