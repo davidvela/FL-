@@ -61,8 +61,8 @@ def mainRun():
     execc = get_models(md.DESC)
 
     # DATA READ  ------------------------------------------------ 
-    # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
-    md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
+    # md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
     
 
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
@@ -80,7 +80,7 @@ def mainRun():
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()
         print(mr.model_path)    
-        # mr.evaluate( )
+        mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
     
     # PRINTING  ------------------------------------------------ 

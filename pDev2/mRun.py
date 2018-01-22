@@ -14,6 +14,7 @@ from types import *
 from collections import Counter
 from datetime import datetime
 import utils_data as md
+# import pickle
 
 def get_nns(): 
     #nns =  str(ninp)+'*'+str(h[0])+'*'+str(h[1])+'*'+str(nout)
@@ -222,15 +223,18 @@ def evaluate( ):
         print("Training   Accuracy:", tr_ac )
         print("Evaluation Accuracy:", ev_ac )
         # xtp1.append(dataTest['data'][i]);    ytp1.append(dataTest['label'][i])
-        predv, softv = sess.run([prediction, softmaxT], feed_dict={x: md.dst.iloc[:md.spn, 3:]  }) # , y: md.dataE['label'] 
+        predv, sf = sess.run([prediction, softmaxT], feed_dict={x: md.dst.iloc[:md.spn, 3:]  }) # , y: md.dataE['label'] 
         # maxa = sess.run([prediction], feed_dict={y: predv })
         
     print("Preview the first predictions:")
     for i in range(20):
         print("RealVal: {}  - PP value: {}".format( md.dc( md.dst.loc[:md.spn-1,'FP_P'][i])   , 
                                                     md.dc( predv.tolist()[i], np.max(predv[i]))  ))
-    gt3, gtM = md.check_perf_CN(softv, md.dst.loc[:md.spn-1,'FP_P'], False)
+    gt3, gtM = md.check_perf_CN(sf, md.dst.loc[:md.spn-1,'FP_P'], False)
     logr(  it=epochs, typ='EV', AC=ev_ac,DS=md.DESC, num=md.spn, AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
+    
+    calc_confusion_m( sf, md.dst.loc[:md.spn-1,'FP_P'])
+
     return predv.tolist()
 
 def tests(url_test = 'url', p_col=False):  
@@ -264,13 +268,6 @@ def tests(url_test = 'url', p_col=False):
         ts_ac = str(ts_acn) 
         print("test ac = {}".format(ts_ac))
     
-    confusion = tf.confusion_matrix(    labels=md.get_conv_list(  md.dsp["FP_P"] ), 
-                                        predictions=[ sf[1][x][0]  for x in range( len(sf[1]) )   ], 
-                                        num_classes=nout)
-    with tf.Session() as sess:
-        print(sess.run(confusion))
-    
-
     # print(dataTest['label']);     print(sf)
     range_ts = len(predv) if len(predv)<20 else 20
     for i in range( range_ts ):
@@ -280,6 +277,8 @@ def tests(url_test = 'url', p_col=False):
     # return
     gt3, gtM = md.check_perf_CN(sf, dataTest["label"], False)
     logr( it=0, typ='TS', DS=DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
+
+    calc_confusion_m( sf, md.dsp["FP_P"] )
 
     # outfile = md.LOGDAT + 'export2' 
     # np.savetxt(outfile + '.csv', sf[1], delimiter=',')
@@ -301,9 +300,23 @@ def vis_chart( ):
     # plt.show()
     return
 
+iccm = 0 
+def calc_confusion_m( sf, dst):
+    global iccm 
+    confusion = tf.confusion_matrix(    labels=md.get_conv_list(  dst ), 
+                                        predictions=[ sf[1][x][0]  for x in range( len(sf[1]) )   ], 
+                                        num_classes=nout)
+    with tf.Session() as sess:
+        conf = sess.run(confusion)
+    print(conf)
 
-md.DESC      = "FRALL1" # "FREXP"  FRFLO
-md.spn       = 10000  
+
+    
+
+
+#--------------------------------------------------------------
+md.DESC      = "FRALL1" # "FREXP"  FRFLO FRALL1
+md.spn       = 10000  # 5000
 md.dType     = "C1" #C1, C2, C4, C0
 epochs       = 100 #100
 
