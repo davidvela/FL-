@@ -309,7 +309,7 @@ def calc_confusion_m( sf, dst):
     with tf.Session() as sess:
         conf = sess.run(confusion)
     print(conf)
-
+    np.savetxt("test.csv", conf, delimiter=",")
 
     
 
