@@ -13,7 +13,7 @@ def get_models(type):
         ]
     elif type == "FRALL1":
         return [
-            { 'dt':'C2',  "e":40, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
             { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
@@ -70,7 +70,7 @@ def mainRun():
     # OPERATIONS  ------------------------------------------------ 
     # md.get_columns(force)
     for ex in execc:
-        md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]
+        md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
         
         md.normalize()
         mr.ninp, mr.nout, mr.top_k = md.getnn()

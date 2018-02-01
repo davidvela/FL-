@@ -233,7 +233,7 @@ def evaluate( ):
     gt3, gtM = md.check_perf_CN(sf, md.dst.loc[:md.spn-1,'FP_P'], False)
     logr(  it=epochs, typ='EV', AC=ev_ac,DS=md.DESC, num=md.spn, AC3=gt3, AC10=gtM, desc=md.des(), startTime=startTime )
     
-    calc_confusion_m( sf, md.dst.loc[:md.spn-1,'FP_P'])
+    calc_confusion_m( sf, md.dst.loc[:md.spn-1,'FP_P'], "EV")
 
     return predv.tolist()
 
@@ -278,7 +278,7 @@ def tests(url_test = 'url', p_col=False):
     gt3, gtM = md.check_perf_CN(sf, dataTest["label"], False)
     logr( it=0, typ='TS', DS=DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
 
-    calc_confusion_m( sf, md.dsp["FP_P"] )
+    calc_confusion_m( sf, md.dsp["FP_P"], "TS" )
 
     # outfile = md.LOGDAT + 'export2' 
     # np.savetxt(outfile + '.csv', sf[1], delimiter=',')
@@ -301,7 +301,7 @@ def vis_chart( ):
     return
 
 iccm = 0 
-def calc_confusion_m( sf, dst):
+def calc_confusion_m( sf, dst,tid="t"):
     global iccm 
     confusion = tf.confusion_matrix(    labels=md.get_conv_list(  dst ), 
                                         predictions=[ sf[1][x][0]  for x in range( len(sf[1]) )   ], 
@@ -309,7 +309,7 @@ def calc_confusion_m( sf, dst):
     with tf.Session() as sess:
         conf = sess.run(confusion)
     print(conf)
-    np.savetxt("test.csv", conf, delimiter=",")
+    np.savetxt(md.LOGDAT + "cm" + tid +".csv", conf, delimiter=",")
 
     
 
