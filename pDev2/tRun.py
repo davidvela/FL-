@@ -30,10 +30,8 @@ def print_results(execc, typ = "pt"):
     for i in range(5): #40
         # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
-
         # algorithm to check the probs of the pred.
         # .. 
-
         # check concitions - only when diff > 3 
         gt3 = 0;  gt3, gtM = md.comp_perf(md.dsp.iloc[i,1], execc[2]["pt"][1][i][0]  )
         line = print_line(execc, i, typ)        # if gt3 == 1:  
