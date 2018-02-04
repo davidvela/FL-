@@ -470,7 +470,7 @@ def split_data():
 
     #control split - I need more information... 
 
-def print_formulation(ds):
+def print_form(ds):
     # print(ds.iloc[ds.nonzero()])
     print(*ds.iloc[ds.nonzero()].index) # in 1 line
     print(*ds.iloc[ds.nonzero()])       # in 1 line
@@ -490,7 +490,7 @@ def main2():
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     get_tests(url_test, force, excel )
-    print_formulation( dsp.iloc[2]  )
+    print_form( dsp.iloc[2]  )
 
 def main3(): 
     mainRead2(ALL_DS, 1, 10, all = False, shuffle = True  ) ; normalize()

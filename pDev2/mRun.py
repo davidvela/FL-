@@ -246,16 +246,18 @@ def tests(url_test = 'url', p_col=False):
         md.get_columns( )  #md.dsc
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
     else: 
-        if url_test != 'url':   # test  file 
-            json_data = url_test + "data_jsonX.txt"
-            tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
-            tmpLab = tmpLab.loc[:,'fp']
-            DESC   = "FREXP1_X"
-        else:                   # get data test JSON = url
-            json_str, tmpLab = md.get_data_test(md.DESC)
-            json_data = json.loads(json_str)
-            DESC =  'matnrList...'
-        force = False
+        # logic migrated to get_tests -- 04.02
+        # if url_test != 'url':   # test  file 
+        #     json_data = url_test + "data_jsonX.txt"
+        #     tmpLab = pd.read_csv(url_test + "datalX.csv", sep=',', usecols=[0,1])    
+        #     tmpLab = tmpLab.loc[:,'fp']
+        #     DESC   = "FREXP1_X"
+        # else:                   # get data test JSON = url
+        #     json_str, tmpLab = md.get_data_test(md.DESC)
+        #     json_data = json.loads(json_str)
+        #     DESC =  'matnrList...'
+        # force = False
+
         md.get_tests(url_test ) #dsp
         dataTest['data']  = md.dsp.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsp.iloc[:, 2].as_matrix().tolist()     
     # Predict data 
