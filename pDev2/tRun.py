@@ -26,8 +26,8 @@ def print_results(execc, typ = "pt"):
     file = md.LOGDAT + md.DESC + "/_logs_tr2.txt"
     f = open(file, 'w')
         
-    # for i in range(len(md.dsp)): #40
-    for i in range(5): #40
+    # for i in range(len(md.dsp)): 
+    for i in range(10): #40
         # print("m:{0:15} - R-{4:5}   ||_____________C1-{1:2}_____________C2-{2:2}_____________C3-{3}" 
         # .format(md.dsp.iloc[i,0], execc[0]["pt"][1][i][0], execc[1]["pt"][1][i][0],  execc[2]["pt"][1][i], md.dsp.iloc[i,1], ))    
         # algorithm to check the probs of the pred.
@@ -41,14 +41,14 @@ def print_results(execc, typ = "pt"):
     f.close()       #close file
 
 def print_line(execc, i, typ = "pt"): 
-    promp = "m:{0:15} \tR-{1:5}   \t||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
+    promp = "m:{0:10} \tR-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
     promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
     return(promp)
 
 def print_pred( ex , typ, i  ): 
-    promp =  "_____________" + ex["dt"] 
-    # promp =  "\t" + ex["dt"] 
-    if ex["dt"] == "C1": return promp + "{0}".format(ex[typ][1][i])
+    promp =  "____" + ex["dt"] 
+    # promp =  "\t" + ex["dt"]                                       prob.
+    if ex["dt"] == "C1": return promp + "{0} ({1})".format(ex[typ][1][i],ex[typ][0][i] ) # + 
     else: return promp + "{0:2}".format(ex[typ][1][i][0])
 
 def mainRun(): 
