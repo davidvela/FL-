@@ -166,7 +166,6 @@ def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuf
         
 def convert_2List(dst): return {'label' : dst["label"].as_matrix().tolist(), 'data' : dst["data"].as_matrix().tolist()}
 
-
 def get_batches(batch_size):
     n_batches = int(len( dst.loc[spn:]  ) // batch_size)
     print(n_batches*batch_size)
@@ -477,7 +476,26 @@ def print_form(ds):
     
     print("N. of components: {}".format(len(ds.iloc[ds.nonzero()])  ))
 
-
+def print_form2(ds): 
+    col_df = pd.read_csv( COL_DS , index_col=2, sep=',', usecols=[0,1,2,3,4], encoding = "ISO-8859-1")    
+    comp = len(ds.iloc[ds.nonzero()])
+    print("N. of components: {}".format(comp  ))
+    els = ds.iloc[ds.nonzero()]
+    els[2:] = els[2:]*100
+    print("components:")
+    warning = "" ; wc = 0
+    for i in range(len(els)): 
+        #print("{0:20} - {1:10}%".format(els.index[i], els[i]))
+        tot = ""; name = ""; fp=""
+        nam = els.index[i]
+        val = els[i]
+        if nam != "M" and nam !="FP":
+            #name = col_df.loc[int(nam)]["NAM"]
+            tot = col_df.loc[int(nam)]["tot"]
+            fp =  col_df.loc[int(nam)]["fp"]
+            if fp<60: warning = "Components with FP < 60: "; wc+=1
+        print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}%".format(nam, val, name, tot, fp ))
+    print(warning+str(wc))
 
 
 def main1(): 

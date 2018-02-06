@@ -15,7 +15,7 @@ from collections import Counter
 from datetime import datetime
 import utils_data as md
 # import pickle
-import intertools
+import itertools
 
 def get_nns(): 
     #nns =  str(ninp)+'*'+str(h[0])+'*'+str(h[1])+'*'+str(nout)
@@ -306,7 +306,8 @@ def vis_chart( ):
 def vis_confusion_m(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Blues, 
+                          tid="t"):
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
@@ -332,10 +333,11 @@ def vis_confusion_m(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-    
+    plt.savefig(md.LOGDAT + tid + "conf_mat.png" )
+
 
 iccm = 0 
-def calc_confusion_m( sf, dst,tid="t"):
+def calc_confusion_m( sf, dst, tid="t"):
     global iccm 
     confusion = tf.confusion_matrix(    labels=md.get_conv_list(  dst ), 
                                         predictions=[ sf[1][x][0]  for x in range( len(sf[1]) )   ], 
@@ -343,21 +345,29 @@ def calc_confusion_m( sf, dst,tid="t"):
     with tf.Session() as sess:
         conf = sess.run(confusion)
    
-    if md.dType != "C1": print(conf)
     np.savetxt(md.LOGDAT + "cm" + tid +".csv", conf, delimiter=",")
-
+    
+    if md.dType != "C1": print(conf)
+    else: 
+        class_names = [str(i) for i in range(md.nout)]
+        vis_confusion_m( conf, classes=class_names, normalize=False,
+                            title='Confusion matrix, without normalization',
+                            cmap=plt.cm.cool, tid=tid)
 
     
 
 
 #--------------------------------------------------------------
-md.DESC      = "FRALL1" # "FREXP"  FRFLO FRALL1
-md.spn       = 5000  # 5000
-md.dType     = "C1" #C1, C2, C4, C0
-epochs       = 200 #100
+md.DESC      = "FRALL1" # "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
+ex =  { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100],       "spn": 10000, "pe": [], "pt": []  }
+# ex =  { 'dt':'C1',  "e":200, "lr":0.001, "h":[100 , 100, 100], "spn": 10000, "pe": [], "pt": []  }
 
-lr           = 0.001 #0.0001
-h            = [100 , 100, 100]   #[40 , 10]   [200, 100, 40] [100,100]
+md.spn       = ex["spn"] 
+md.dType     = ex["dt"] 
+epochs       = ex["e"] 
+lr           = ex["lr"]
+h            = ex["h"]   
+
 ninp, nout   = 10, 10
 disp         = 5
 batch_size   = 128
@@ -394,7 +404,7 @@ def mainRun():
     # OP.                           comp. 
     #---------------------------------------------------------------
 
-    train(epochs, disp, batch_size, True)
+    # train(epochs, disp, batch_size, True)
     evaluate( )
     
     tests(url_test, p_col=False  )
