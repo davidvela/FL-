@@ -220,7 +220,7 @@ def mainRead2(path, part, batch_size,  all = True, shuffle = True):  # read by p
     # dataE= convert_2List(dataE)
     # return ninp, nout
  
-def getnn():
+def getnn(ninp=0):
     ninp = len(dst.columns) - 3 
     if   dType == 'C4':  nout = 4;   top_k = 3
     elif dType == 'C2':  nout = 2;   top_k = 2

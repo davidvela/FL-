@@ -1,54 +1,47 @@
 """A client that talks to tensorflow_model_server
 
 Typical usage example:
-    sClient.py --num_tests=100 --server=localhost:9000
+    sClient.py --num_tests=100    --server=localhost:9000
+    sClient.py --input=./form.txt --server=localhost:9000
+
+Hint: the code has been compiled together with TensorFlow serving
+and not locally. The client is called in the TensorFlow Docker container
 """
-
-import sys
-import threading
-
-# This is a placeholder for a Google-internal import.
-
+from __future__ import print_function
+# Communication to TensorFlow server via gRPC
 from grpc.beta import implementations
-import numpy
 import tensorflow as tf
+# TensorFlow serving  to send messages
+# from tensorflow_serving.apis import predict_pb2
+# from tensorflow_serving.apis import prediction_service_pb2
 
-from tensorflow_serving.apis import predict_pb2
-from tensorflow_serving.apis import prediction_service_pb2
-
-tf.app.flags.DEFINE_integer('concurrency', 1,
-                            'maximum number of concurrent inference requests')
-tf.app.flags.DEFINE_integer('num_tests', 100, 'Number of test images')
-tf.app.flags.DEFINE_string('server', '', 'PredictionService host:port')
-tf.app.flags.DEFINE_string('work_dir', '/tmp', 'Working directory. ')
+# Command line arguments
+tf.app.flags.DEFINE_string('server', 'localhost:9000', 'PredictionService host:port')
+tf.app.flags.DEFINE_string('input', '', 'path to csv input')
 FLAGS = tf.app.flags.FLAGS
 
-def do_inference(hostport, work_dir, concurrency, num_tests):
-    """Tests PredictionService with concurrent requests.
-    Args:
-        hostport: Host:port address of the PredictionService.
-        work_dir: The full path of working directory for test data set.
-        concurrency: Maximum number of concurrent requests.
-        num_tests: Number of test images to use.
-    Returns:
-        The classification error rate.
-    Raises:
-        IOError: An error occurred processing test data set.
-    """
-    return 0
-
-
 def main(_):
-    if FLAGS.num_tests > 10000:
-        print('num_tests should not be greater than 10k')
-        return
-    if not FLAGS.server:
-        print('please specify server host:port')
-        return
-    error_rate = do_inference(FLAGS.server, FLAGS.work_dir,
-                            FLAGS.concurrency, FLAGS.num_tests)
-    print('\nInference error rate: %s%%' % (error_rate * 100))
+    host, port = FLAGS.server.split(':')
+    # channel = implementations.insecure_channel(host, int(port))
+    # stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
+    print(FLAGS.server)
 
+    # Send request
+    
+
+
+    # with open(FLAGS.image, 'rb') as f:
+    #     # See prediction_service.proto for gRPC request/response details.
+    #     data = f.read()
+    #     request = predict_pb2.PredictRequest()
+
+    #     # Call GAN model to make prediction on the image
+    #     request.model_spec.name = 'gan'
+    #     request.model_spec.signature_name = 'predict_images'
+    #     request.inputs['images'].CopyFrom( tf.contrib.util.make_tensor_proto(data, shape=[1]))
+
+    #     result = stub.Predict(request, 60.0)  # 60 secs timeout
+    #     print(result)
 
 if __name__ == '__main__':
-  tf.app.run()
+    tf.app.run()

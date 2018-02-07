@@ -75,6 +75,8 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
         softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)                       # CLASS
+        # values, indices  = tf.nn.top_k(tf.nn.softmax(out), top_k)             # CLASS
+        # prediction_classes = table.lookup(tf.to_int64(indices))
         correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))       # CLASS
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))      # CLASS
 

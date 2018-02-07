@@ -66,7 +66,7 @@ def mainRun():
     for ex in execc:
         md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
         
-        md.normalize()
+        md.normalize()  
         mr.ninp, mr.nout, mr.top_k = md.getnn()
         md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(mr.epochs, final=final) +"/" 
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
@@ -81,6 +81,5 @@ def mainRun():
 
 if __name__ == '__main__':
     mainRun()
-
 
 
