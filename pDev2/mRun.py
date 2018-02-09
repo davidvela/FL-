@@ -70,7 +70,7 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
     prediction=tf.reduce_max(y,1)    # CLASS
-    prediction = out                 # REG
+    # prediction = out                 # REG
 
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
@@ -102,7 +102,7 @@ def build_network3():
     # confusion = tf.confusion_matrix(labels=y, predictions=prediction, num_classes=nout)
     
     with tf.name_scope("xent"): #loss
-        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y))
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
         if md.dType == "C0": cost = tf.reduce_mean(tf.square(prediction-y) )               # REG
         tf.summary.scalar("xent", cost)
     
