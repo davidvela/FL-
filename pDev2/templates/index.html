@@ -4,6 +4,7 @@
     </head>
     <body>
         <h1>Hello, {{ user.username }}!</h1>
+
         {% for message in get_flashed_messages() %}
             <div class="flash">{{ message }}</div>
         {% endfor %}
@@ -18,5 +19,16 @@
               <dd><input type="submit" value="Calculate">
             </dl>
         </form>
+
+        <br>Previous data<br>
+        <form method="post">
+            <dl>
+                {{ form.forml  }}
+            </dl>
+        </form>
+
+
+
+
     </body>
 </html>

@@ -27,7 +27,11 @@ user = {'username': 'David_A'}
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title='Home', user=user)
+    form = CalcForm( )
+    form.forml.data = "hola1"
+
+
+    return render_template('index.html', title='Home', user=user, form = form)
 
     # print(get('http://localhost:5000/hello').json())
     # return "Hello, World!"
@@ -58,6 +62,7 @@ def Calc():
         # return redirect(url_for('index'))
         # return redirect('/index2')
         # return redirect(url_for('index'))
+    form.forml.data = "hola2"
     flash('Not preshed!')
     return render_template('index.html', title='Home', user=user, form = form )
 
