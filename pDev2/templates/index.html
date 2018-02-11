@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>FP Client</title>
+    </head>
+    <body>
+        <h1>Hello, {{ user.username }}!</h1>
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        
+        
+        
+        
+        <form action="{{ url_for('Calc') }}" method="post">
+            <dl>
+              <dt>Form:
+              <dd><input type="text" name="forml" size=100>
+              <dd><input type="submit" value="Calculate">
+            </dl>
+        </form>
+    </body>
+</html>
