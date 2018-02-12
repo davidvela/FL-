@@ -55,11 +55,13 @@ flag_dsp = True
 flag_dsc = True 
 
 def setDESC(pDESC): 
-    global COL_DS, ALL_DS, ALL_DSJ, DESC
+    global COL_DS, ALL_DS, ALL_DSJ, DESC, pp_abs
     DESC = pDESC
     COL_DS     = LOGDAT + DESC + DC 
     ALL_DSJ    = LOGDAT + DESC + DSJ 
     ALL_DS     = LOGDAT + DESC + DSC 
+    pp_abs     = False
+    # pp_abs = False if pDESC == "FRFLO" else True
 
 def des(): return DESC+'_'+dType+"_filt:"+  filter[0]+str(filter[1])
 def c2(df, rv=1):
@@ -260,6 +262,7 @@ def comp_perf( val, pred, dType='C1'):
         if num > 10: gtM+=1
     return gt3, gtM 
 
+#FD
 def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
     #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
     index_col = 2 #name - num, abs = cc
@@ -275,7 +278,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
         indx = col_df.index
         indx = indx.insert(0, "M")
         indx = indx.insert(1, "FP")  # indx = indx.insert(2, "FP_P")
-
+    print(type(indx[5]));print(indx[5]);
     if p_col:    
         dataTest_label = []
         dataJJ = "["
@@ -302,7 +305,8 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
     
     if p_all: ll = range(len(json_data))
     else: ll = range(ll_st, ll_en)
-
+    # pp_abs = True  # test 
+    print("PP_ABS = " + str(pp_abs));    
     #for i in range(2):
     for i in ll: # print(i)
         df_entry *= 0
@@ -315,17 +319,20 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
                 
                 if isInt : key_wz = int(key)  # if comp NOT conatin letters
                 else: key_wz = str(key)       # if comp contains letters
-                
+                                
                 try: #filling of key - experimental or COMP 
                     if d_st:
                         ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
                         col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
                     else: 
-                        col_key = str(int(key)) 
+                        col_key = int(key) #str(int(key)) 
+                    col_key = int(col_key)
                     df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
+                    # print(col_key); print(type(col_key))
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
-        df_entry = df_entry.replace(0, np.nan)
+        # ONLY USED TO CONVERT JSON TO EXCEL => EXCEL WILL BE SMALLER
+        # df_entry = df_entry.replace(0, np.nan) # DANGER !!! 
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
     print("Counter of comp. not included :"); print(ccount) # print(len(ccount))

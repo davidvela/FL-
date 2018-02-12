@@ -291,6 +291,30 @@ def tests(url_test = 'url', p_col=False):
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     return sf
 
+def tests_exec(url_test = 'url'):  
+    dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
+    # md.get_tests(url_test) #dsp
+    json_str = "[" + url_test + "]" 
+    tmpLab = [88] 
+    json_data = json.loads(json_str)
+    dsp = md.feed_data(json_data ,pand=True, d_st=True, p_all = True)       #d_st = display status
+    dsp["FP"] = tmpLab; dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: md.cc( x )))
+    dataTest['data']  = dsp.iloc[:, 3:].as_matrix().tolist();   # No FP
+    dataTest['label'] = dsp.iloc[:, 2].as_matrix().tolist()     # dummy 
+    
+    # md.print_form2(dsp.iloc[0]);     # print(dsp.iloc[0])
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        restore_model(sess)
+        # predv = sess.run( prediction, feed_dict={x: dataTest['data']}) 
+        predv, sf = sess.run( [ prediction, softmaxT], feed_dict={x: dataTest['data']}) #, y: dataTest['label']}) 
+
+    for i in range( 1 ):
+        # print("RealVal: {}  - PP value: {}".format( md.dc( dataTest['label'][i]), md.dc( predv.tolist()[i], np.max(predv[i]))  ))  
+        print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc(dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]  ))
+
+    return 812
+
 def clean_traina():
     global train_accuracies, test_accuracies
     train_accuracies, test_accuracies = [], []
@@ -382,8 +406,8 @@ def mainRun():
     # DATA READ 
     #---------------------------------------------------------------
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    # md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    md.mainRead2(ALL_DS, 1, 2, all = False )
+    print("hi")
     md.normalize()
     ninp, nout, top_k = md.getnn()
     # print(len(md.dst))
