@@ -313,7 +313,7 @@ def tests_exec(url_test = 'url'):
         # print("RealVal: {}  - PP value: {}".format( md.dc( dataTest['label'][i]), md.dc( predv.tolist()[i], np.max(predv[i]))  ))  
         print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc(dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]  ))
 
-    return 812
+    return "PP: {} PR: {}".format(sf[1][0], sf[0][0] )
 
 def clean_traina():
     global train_accuracies, test_accuracies

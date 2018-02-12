@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired
 
 class CalcForm(FlaskForm):
     forml = StringField('forml', validators=[DataRequired()])
+    check = BooleanField('WS Call')
     submit = SubmitField('Calc')
 
 app = Flask(__name__)
@@ -49,12 +50,14 @@ def Calc():
     # if form.validate_on_submit():  # press button
     if request.method == 'POST': # and form.validate():
         # CALCULATION LOGIC: 
-        # ret = get('http://localhost:5000/dummy', data={'data': form.forml.data }).json()
-        # pred = ret ... 
-        # + error handling 200, 201 ... 404 codes! 
-        # print(ret)        
-        
-        pred = 101
+        if form.check.data == True: 
+            pred = get('http://localhost:5000/dummy', data={'data': form.forml.data }).json()
+            # pred = ret ... 
+            # + error handling 200, 201 ... 404 codes! 
+            print(pred)        
+        else:     
+            pred = 101
+
         flash('Calc requested for form {}'.format( form.forml.data))
         flash('pred={}'.format( pred ))
         return render_template('index.html', title='Home', user=user, form = form  )
@@ -62,8 +65,8 @@ def Calc():
         # return redirect(url_for('index'))
         # return redirect('/index2')
         # return redirect(url_for('index'))
-    form.forml.data = "hola2"
-    flash('Not preshed!')
+    form.forml.data = "not calculated"
+    flash('Button Not Clicked!')
     return render_template('index.html', title='Home', user=user, form = form )
 
 
