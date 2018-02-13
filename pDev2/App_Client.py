@@ -15,14 +15,17 @@ app.config.update(dict(
     SECRET_KEY="powerful secretkey",
     WTF_CSRF_SECRET_KEY="a csrf secret key"
 ))
-app.config['SERVER_NAME'] = '127.0.0.1' + ':' + '5002'
-# flask_app.config['SERVER_NAME'] = server_name + ':' + server_port
-# flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION # 'list'
-# flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE # True
-# flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER # False
-# flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP # False 
-#                   - If a request does not match any of the application endpoints => return error 404 or not 
+def app_config():
+    # not working!!!! 
+    app.config['SERVER_NAME'] = '127.0.0.1' + ':' + '5002'
+    # flask_app.config['SERVER_NAME'] = server_name + ':' + server_port
+    # flask_app.config['SWAGGER_UI_DOC_EXPANSION'] = settings.RESTPLUS_SWAGGER_UI_DOC_EXPANSION # 'list'
+    # flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE # True
+    # flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER # False
+    # flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP # False 
+    #                   - If a request does not match any of the application endpoints => return error 404 or not 
 
+app_config()
 user = {'username': 'David_A'}
 
 @app.route('/')
@@ -73,6 +76,7 @@ def Calc():
 
 if __name__ == "__main__":
     app.run(debug=True)  
+    # app.run(host="0.0.0.0")  # accessible from the network! 
 
 def test_curl():
     pass
