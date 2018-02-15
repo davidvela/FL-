@@ -465,7 +465,7 @@ def testsJ2(excel=True, split = False, pTest = True):
 
 def down_excel(data, excel_flag): 
     if excel_flag: 
-        writer = pd.ExcelWriter(LOGDAT+'pandas_datasc.xlsx')
+        writer = pd.ExcelWriter(LOGDAT+'json2excel.xlsx')
         data.to_excel(writer, sheet_name='Sheet1')
         writer.save()
         print("JSON downloaded into excel! ")

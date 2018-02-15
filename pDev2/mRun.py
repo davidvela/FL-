@@ -406,8 +406,8 @@ def mainRun():
     # DATA READ 
     #---------------------------------------------------------------
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
-    md.mainRead2(ALL_DS, 1, 2, all = False )
-    print("hi")
+    md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    # md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout, top_k = md.getnn()
     # print(len(md.dst))
@@ -430,7 +430,7 @@ def mainRun():
     # OP.                           comp. 
     #---------------------------------------------------------------
 
-    # train(epochs, disp, batch_size, True)
+    train(epochs, disp, batch_size, True)
     evaluate( )
     
     tests(url_test, p_col=False  )
