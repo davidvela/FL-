@@ -335,6 +335,10 @@ def vis_confusion_m(cm, classes,
                           cmap=plt.cm.Blues, 
                           tid="t"):
     plt.figure()
+    if md.dType == "C1": 
+        fig = plt.gcf()
+        fig.set_size_inches(32, 32)
+    
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
@@ -351,6 +355,7 @@ def vis_confusion_m(cm, classes,
     #print(cm)
 
     thresh = cm.max() / 2.
+
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
         plt.text(j, i, cm[i, j],
                  horizontalalignment="center",
