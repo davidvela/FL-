@@ -13,9 +13,9 @@ def get_models(type):
         ]
     elif type == "FRALL1":
         return [
-            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
-            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
-            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
         ]
     else: return []
@@ -74,10 +74,13 @@ def mainRun():
         print(mr.model_path)    
         ex["pe"]   = mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
-    
+
     # PRINTING  ------------------------------------------------ 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
     print_results(execc, typ = "pt") 
+
+    # DOWNLOAD EXCEL! ------------------------------------------------ 
+
 
 if __name__ == '__main__':
     mainRun()
