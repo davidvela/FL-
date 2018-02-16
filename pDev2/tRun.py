@@ -61,6 +61,9 @@ def mainRun():
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     md.get_tests(url_test, force, excel )
 
+    download_pandas()
+    return
+
     # OPERATIONS  ------------------------------------------------ 
     # md.get_columns(force)
     for ex in execc:
@@ -72,14 +75,21 @@ def mainRun():
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()                                                                                                                                                                                                                                                                                    
         print(mr.model_path)    
-        ex["pe"]   = mr.evaluate( )
+        ex["pe"] = mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
 
     # PRINTING  ------------------------------------------------ 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
     print_results(execc, typ = "pt") 
 
+def download_pandas():
     # DOWNLOAD EXCEL! ------------------------------------------------ 
+    # create a pandas and create new columns - like     
+    print("\n download pandas")
+    return "hola"
+    # 2 datasets: 
+    # evd = md.dst
+    # tsd = md.dsp.
 
 
 if __name__ == '__main__':
