@@ -334,7 +334,7 @@ def vis_confusion_m(cm, classes,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues, 
                           tid="t"):
-
+    plt.figure()
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
@@ -359,7 +359,9 @@ def vis_confusion_m(cm, classes,
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-    plt.savefig(md.LOGDAT + tid + "conf_mat.png" )
+    plt.savefig(md.LOGDAT + md.dType + "_" + tid + "conf_mat.png" )
+    # plt.clf()
+    # plt.cla()  # for multiple subplots
 
 
 iccm = 0 
@@ -373,7 +375,8 @@ def calc_confusion_m( sf, dst, tid="t"):
    
     np.savetxt(md.LOGDAT + "cm" + tid +".csv", conf, delimiter=",")
     
-    if md.dType != "C1": print(conf)
+    if md.dType == "C1N": 
+        print(conf)
     else: 
         class_names = [str(i) for i in range(md.nout)]
         vis_confusion_m( conf, classes=class_names, normalize=False,
