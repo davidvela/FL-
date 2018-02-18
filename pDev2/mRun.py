@@ -442,8 +442,17 @@ def mainRun():
     evaluate( )
     
     tests(url_test, p_col=False  )
-    vis_chart( )
+    vis_chart( )  # visualize the training chart
     print("___The end!")
+
+    #---------------------------------------------------------------
+    # NN                           retrain! - optimization... 
+    #---------------------------------------------------------------
+    # optimize - old_model, new_model, --- why? how?? 
+    #   take the wrong data and retrain the model with only the errors ... 
+    #   modify the train function - optimization 
+
+
 
 if __name__ == '__main__':
     mainRun()
