@@ -486,7 +486,8 @@ def print_form(ds):
     print("N. of components: {}".format(len(ds.iloc[ds.nonzero()])  ))
 
 def print_form2(ds): 
-    col_df = pd.read_csv( COL_DS , index_col=2, sep=',', usecols=[0,1,2,3,4], encoding = "ISO-8859-1")    
+    col_df = pd.read_csv( COL_DS , index_col=2, sep=',', usecols=[0,1,2,3], encoding = "ISO-8859-1")   # ,4 = NAM
+
     comp = len(ds.iloc[ds.nonzero()])
     print("N. of components: {}".format(comp  ))
     els = ds.iloc[ds.nonzero()]
@@ -498,12 +499,16 @@ def print_form2(ds):
         tot = ""; name = ""; fp=""
         nam = els.index[i]
         val = els[i]
-        if nam != "M" and nam !="FP":
+        if nam != "M" and nam !="FP" and nam !="FP_P":
+            fp = 101
+            le_60 = ''
             #name = col_df.loc[int(nam)]["NAM"]
-            tot = col_df.loc[int(nam)]["tot"]
-            fp =  col_df.loc[int(nam)]["fp"]
-            if fp<60: warning = "Components with FP < 60: "; wc+=1
-        print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}%".format(nam, val, name, tot, fp ))
+            tot = col_df.loc[int(nam)]["tot"]  # error... 
+            fp =  col_df.loc[int(nam)]["fp"]   # error...
+            if fp<60: warning = "Components with FP < 60: "; wc+=1; le_60 = 'X'
+            print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}% \t\t{5}".format(nam, val, name, tot, fp, le_60 ))
+        elif nam == "M" or nam =="FP" : 
+            print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}".format(nam, val, name, tot, fp ))
     print(warning+str(wc))
 
 

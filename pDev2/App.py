@@ -159,7 +159,7 @@ def single_tests():
                                     "131315" :0.0001 }  ''' 
     # real = 73 #pred 73 high, 77,74...
     # forml2 = '''{ "m":"1",          "100023" : 1 }    '''
-    beginc = """
+
     real = 54 #pred 57, 58 low prod
     forml2 = '''{ "m":"125660",     "160102" :0.31245 , 
                                     "131504" :0.1 , 
@@ -197,8 +197,11 @@ def single_tests():
                                     "131080" :0.0005 , 
                                     "100202" :0.0005 , 
                                     "131091" :0.00005 } '''; 
-    real = 101 #pred 101, 100
-    forml2 = '''{ "m":"130935",     "130935" :1 }       '''
+    
+    # real = 101 #pred 101, 100
+    # forml2 = '''{ "m":"130935",     "130935" :1 } '''
+    
+    # beginc = """
     real = 88  #pred 89,88
     forml2 = '''{ "m":"151436",     "164419" :0.531 , 
                                     "718425" :0.2 ,   
@@ -214,11 +217,14 @@ def single_tests():
                                     "600194" :0.01 , 
                                     "100476" :0.005 , 
                                     "131002" :0.004 }   '''
-    beginc = "" "
+    beginc = """
     """ #end of comment
     
     pred = DAO.get(forml2)
     print("\n\n\n_R = {} and P = {}" .format(real ,pred ) )
+    # print(md.dsp[["M","FP"]])
+    # print(md.dsp.iloc[0])
+    md.print_form2(md.dsp.iloc[0])
 
 if __name__ == '__main__':
     # app.run(debug=True)

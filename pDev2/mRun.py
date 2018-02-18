@@ -248,7 +248,7 @@ def tests(url_test = 'url', p_col=False):
     if p_col:                   # test columns 
         md.get_columns( )  #md.dsc
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
-    else: 
+    elif p_col == False:        # test dataset 
         # logic migrated to get_tests -- 04.02
         # if url_test != 'url':   # test  file 
         #     json_data = url_test + "data_jsonX.txt"
@@ -295,13 +295,14 @@ def tests_exec(url_test = 'url'):
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     # md.get_tests(url_test) #dsp
     json_str = "[" + url_test + "]" 
-    tmpLab = [88] 
+    tmpLab = [1] # dummy 
     json_data = json.loads(json_str)
-    dsp = md.feed_data(json_data ,pand=True, d_st=True, p_all = True)       #d_st = display status
-    dsp["FP"] = tmpLab; dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: md.cc( x )))
-    dataTest['data']  = dsp.iloc[:, 3:].as_matrix().tolist();   # No FP
-    dataTest['label'] = dsp.iloc[:, 2].as_matrix().tolist()     # dummy 
-    
+    md.dsp = md.feed_data(json_data ,pand=True, d_st=True, p_all = True)       #d_st = display status
+    md.dsp["FP"] = tmpLab; 
+    md.dsp.insert(2, 'FP_P', md.dsp['FP'].map(lambda x: md.cc( x )))
+    dataTest['data']  = md.dsp.iloc[:, 3:].as_matrix().tolist();   # No FP
+    dataTest['label'] = md.dsp.iloc[:, 2].as_matrix().tolist()     # dummy 
+     
     # md.print_form2(dsp.iloc[0]);     # print(dsp.iloc[0])
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -312,7 +313,9 @@ def tests_exec(url_test = 'url'):
     for i in range( 1 ):
         # print("RealVal: {}  - PP value: {}".format( md.dc( dataTest['label'][i]), md.dc( predv.tolist()[i], np.max(predv[i]))  ))  
         print("{} RealVal: {} - {} - PP: {} PR: {}".format( i, md.dc(dataTest['label'][i]), sf[1][i][0],  sf[1][i], sf[0][i]  ))
-
+    
+    logr( it=0, typ='AP', DS=md.DESC, AC=sf[1][0] ,num=sf[0][0],  AC3=0, AC10="real?", desc=str(md.dsp.iloc[0,0] ) )  
+    # logr( it=0, typ='TS', DS=md.DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
     return "PP: {} PR: {}".format(sf[1][0], sf[0][0] )
 
 def clean_traina():
