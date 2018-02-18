@@ -27,16 +27,17 @@ def app_config():
 
 app_config()
 user = {'username': 'David_A'}
+data = '''  formula ... <br>
+            components: ... 
+        '''
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     form = CalcForm( )
     form.forml.data = "hola1"
-
-
     return render_template('index.html', title='Home', user=user, form = form)
-
     # print(get('http://localhost:5000/hello').json())
     # return "Hello, World!"
     # ret = get('http://localhost:5000/hello').json()
@@ -52,27 +53,39 @@ def Calc():
 
     # if form.validate_on_submit():  # press button
     if request.method == 'POST': # and form.validate():
-        # CALCULATION LOGIC: 
-        if form.check.data == True: 
-            pred = get('http://localhost:5000/dummy', data={'data': form.forml.data }).json()
-            # pred = ret ... 
-            # + error handling 200, 201 ... 404 codes! 
-            print(pred)        
-        else:     
-            pred = 101
+        # print(request.form)
+        if request.form['submit'] == 'Calculate':
+            # CALCULATION LOGIC: 
+            if form.check.data == True: 
+                pred = get('http://localhost:5000/dummy', data={'data': form.forml.data }).json()
+                # pred = ret ... 
+                # + error handling 200, 201 ... 404 codes! 
+                print(pred)        
+            else:     
+                pred = 101
 
-        flash('Calc requested for form {}'.format( form.forml.data))
-        flash('pred={}'.format( pred ))
-        return render_template('index.html', title='Home', user=user, form = form  )
+            flash('Calc requested for form {}'.format( form.forml.data))
+            flash('pred={}'.format( pred ))
+        
+        else: print("Get information")
+
+        return render_template('index.html', title='Home', user=user, form = form, information = "data" )
 
         # return redirect(url_for('index'))
         # return redirect('/index2')
         # return redirect(url_for('index'))
     form.forml.data = "not calculated"
     flash('Button Not Clicked!')
-    return render_template('index.html', title='Home', user=user, form = form )
+    return render_template('index.html', title='Home', user=user, form = form, information = data)
 
-
+@app.route('/getInf')
+# @multiline  Not working! 
+def getInf():
+    # response.headers["content-type"] = "text/plain"
+    return """This
+              multi-line string <br>
+              <b>will</b> show up <br>
+              just fine"""
 
 if __name__ == "__main__":
     app.run(debug=True)  

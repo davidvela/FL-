@@ -8,15 +8,13 @@
         {% for message in get_flashed_messages() %}
             <div class="flash">{{ message }}</div>
         {% endfor %}
-        
-        
-        
-        
+               
         <form action="{{ url_for('Calc') }}" method="post">
             <dl>
               <dt>Form:
               <dd><input type="text" name="forml" size=100>
-              <dd><input type="submit" value="Calculate">
+              <dd><input type="submit" name="submit" value="Calculate">
+              <dd><input type="submit" name="submit" value="GetInfo">
             </dl>
             <p>{{ form.check() }} {{ form.check.label }}</p>
         </form>
@@ -30,9 +28,7 @@
                 <!-- <input type="text" class="form-control" id="forml" name="forml " size="100px" > -->
             </dl>
         </form>
-
-
-
-
+        <br><h1> Formula Information</h1>
+        {{ information }}
     </body>
 </html>

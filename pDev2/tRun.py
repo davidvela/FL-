@@ -14,8 +14,8 @@ def get_models(type):
     elif type == "FRALL1":
         return [
             { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            # { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            # { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
         ]
     else: return []
@@ -54,15 +54,12 @@ def mainRun():
     execc = get_models(md.DESC)
 
     # DATA READ  ------------------------------------------------ 
-    md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
-    # md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
+    # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
+    md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
 
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     md.get_tests(url_test, force, excel )
-
-    download_pandas()
-    return
 
     # OPERATIONS  ------------------------------------------------ 
     # md.get_columns(force)
@@ -75,22 +72,30 @@ def mainRun():
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()                                                                                                                                                                                                                                                                                    
         print(mr.model_path)    
-        ex["pe"] = mr.evaluate( )
+        # ex["pe"] = mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
 
     # PRINTING  ------------------------------------------------ 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
-    print_results(execc, typ = "pt") 
+    # print_results(execc, typ = "pt") 
+    
+    # DOWNLOAD ------------------------------------------------- 
+    download_pandas(execc)
 
-def download_pandas():
+def download_pandas(execc):
     # DOWNLOAD EXCEL! ------------------------------------------------ 
     # create a pandas and create new columns - like     
-    print("\n download pandas")
-    return "hola"
+    print("\nDownload pandas")
+    # return "hola"
+    
     # 2 datasets: 
     # evd = md.dst
-    # tsd = md.dsp.
-
+    for ex in execc:
+        tsd = md.dsp[["M", "FP"]]
+        # tsd["PRED"] = ex["pe"][1][i][0] # pred 1
+        tsd[ex["dt"] + "_PRED"] = ex["pe"][1] # pred 1
+        tsd[ex["dt"] + "_PROB"] = ex["pe"][0] # prob 
+        tsd.to_csv(md.LOGDAT + "testDS.csv")
 
 if __name__ == '__main__':
     mainRun()
