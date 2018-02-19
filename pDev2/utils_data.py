@@ -494,6 +494,7 @@ def print_form2(ds):
     els[2:] = els[2:]*100
     print("components:")
     warning = "" ; wc = 0
+    
     for i in range(len(els)): 
         #print("{0:20} - {1:10}%".format(els.index[i], els[i]))
         tot = ""; name = ""; fp=""
@@ -511,6 +512,33 @@ def print_form2(ds):
             print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}".format(nam, val, name, tot, fp ))
     print(warning+str(wc))
 
+def get_components(ds): 
+    col_df = pd.read_csv( COL_DS , index_col=2, sep=',', usecols=[0,1,2,3], encoding = "ISO-8859-1")   # ,4 = NAM
+    astr = []; fstr =  ''
+    comp = len(ds.iloc[ds.nonzero()])
+    astr.append( "N. of components: {}".format(comp  ) )
+    els = ds.iloc[ds.nonzero()]
+    els[2:] = els[2:]*100
+    astr.append("components:")
+    warning = "" ; wc = 0
+    
+    for i in range(len(els)): 
+        #print("{0:20} - {1:10}%".format(els.index[i], els[i]))
+        tot = ""; name = ""; fp=""
+        nam = els.index[i]
+        val = els[i]
+        if nam != "M" and nam !="FP" and nam !="FP_P":
+            fp = 101
+            le_60 = ''
+            #name = col_df.loc[int(nam)]["NAM"]
+            tot = col_df.loc[int(nam)]["tot"]  # error... 
+            fp =  col_df.loc[int(nam)]["fp"]   # error...
+            if fp<60: warning = "Components with FP < 60: "; wc+=1; le_60 = 'X'
+            astr.append("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}% \t\t{5}".format(nam, val, name, tot, fp, le_60 ))
+        elif nam == "M" or nam =="FP" : 
+            astr.append("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}".format(nam, val, name, tot, fp ))
+    astr.append(warning+str(wc))
+    return astr
 
 def main1(): 
     print("hi1")

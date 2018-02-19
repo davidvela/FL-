@@ -105,40 +105,21 @@ def download_pandas(execc):
 if __name__ == '__main__':
     mainRun()
 
-
-
-
-
-#save copy
-# md.normalize()  = apply inverse normalization!
-# tsd = md.dsp[["M", "FP"]]
-# tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', md.dsp["FP_P"].map(lambda x: md.dc( x ) ))    
+tsd = md.dsp[["M", "FP"]]
+tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', md.dsp["FP_P"].map(lambda x: md.dc( x ) ))    
 
 # for ex in execc:
 def record_d( ex, dsp, type = "pt"  ):
-
-    print(len(np.array([str(xi[0]) for xi in ex["pt"][1]])))
-    print(len(tsd.columns))
-    
-    tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', dsp["FP_P"].map(lambda x: dc( x ) )    )
-    
-        
-    #tsd[ "_PRED"] = np.array([str(xi[0]) for xi in ex["pt"][1]])  
-    #tsd.insert(len(tsd.columns), ex["dt"] + '_PRED', np.array([str(xi[0]) for xi in ex["pt"][1]])  )    
-    tsd.insert(len(tsd.columns), ex["dt"] + '_PREDU', np.array([str(xi[0]) for xi in ex["pt"][1]])  )    
-    tsd.insert(len(tsd.columns), ex["dt"] + '_PRED', np.array([str(xi) for xi in ex["pt"][1]])  )    
-    tsd.insert(len(tsd.columns), ex["dt"] + '_PROB', np.array([str(xi) for xi in ex["pt"][0]])  )    
+    # print(len(np.array([str(xi[0]) for xi in ex["pt"][1]])));     print(len(tsd.columns))
+    # tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', dsp2["FP_P"].map(lambda x: dc( x ) )    )
+    #tsd[ "_PRED"] = np.array([str(xi[0]) for xi in ex["pt"][1]])  # pandas warnings! 
+    dsp.insert(len(tsd.columns), ex["dt"] + '_PREDU', np.array([str(xi[0])  for xi in ex[type][1]])  )    
+    dsp.insert(len(tsd.columns), ex["dt"] + '_PRED', np.array([str(xi)      for xi in ex[type][1]])  )    
+    dsp.insert(len(tsd.columns), ex["dt"] + '_PROB', np.array([str(xi)      for xi in ex[type][0]])  )    
 
     # error calc: 
-    #tsd[ex["dt"] + '_ERR'] = tsd.[[ex["dt"] + '_PREDU']] == 
-    
-    # tsd["PRED"] = ex["pt"][1][i][0] # pred 1
-    # tsd[ex["dt"] + "_PRED"] = ex["pt"][1] # pred 1
-    # tsd[ex["dt"] + "_PROB"] = ex["pt"][0] # prob 
+    #dsp[ex["dt"] + '_ERR'] = dsp.[[ex["dt"] + '_PREDU']] == 
 
-    #tsd.insert(2, '_PRED', np.array([str(xi[0]) for xi in ex["pt"][1]])  )    
-    #tsd[ex["dt"] + "_PROB"] = ex["pt"][0] # prob 
-    
+tds = record_d( ex, tsd, type = "pt")    
 #tsd.to_csv(md.LOGDAT + "testDSJ.csv")
 tsd.head()
-# md.dsp.head()

@@ -222,8 +222,7 @@ def single_tests():
     
     pred = DAO.get(forml2)
     print("\n\n\n_R = {} and P = {}" .format(real ,pred ) )
-    # print(md.dsp[["M","FP"]])
-    # print(md.dsp.iloc[0])
+    # print(md.dsp[["M","FP"]]);     # print(md.dsp.iloc[0])
     md.print_form2(md.dsp.iloc[0])
 
 if __name__ == '__main__':
