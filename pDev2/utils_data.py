@@ -492,7 +492,7 @@ def print_form2(ds):
     print("N. of components: {}".format(comp  ))
     els = ds.iloc[ds.nonzero()]
     els[2:] = els[2:]*100
-    print("components:")
+    print("components:____ tot ______FP_____values")
     warning = "" ; wc = 0
     
     for i in range(len(els)): 
@@ -519,9 +519,9 @@ def get_components(ds):
     astr.append( "N. of components: {}".format(comp  ) )
     els = ds.iloc[ds.nonzero()]
     els[2:] = els[2:]*100
-    astr.append("components:")
+    astr.append("components:\t tot \t FP \t values")
     warning = "" ; wc = 0
-    
+
     for i in range(len(els)): 
         #print("{0:20} - {1:10}%".format(els.index[i], els[i]))
         tot = ""; name = ""; fp=""
@@ -534,11 +534,21 @@ def get_components(ds):
             tot = col_df.loc[int(nam)]["tot"]  # error... 
             fp =  col_df.loc[int(nam)]["fp"]   # error...
             if fp<60: warning = "Components with FP < 60: "; wc+=1; le_60 = 'X'
-            astr.append("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}% \t\t{5}".format(nam, val, name, tot, fp, le_60 ))
+            astr.append("{0:7} \t {2:5} \t ({3:4}) \t ({4:5}) \t {1:10}% \t\t{5}".format(nam, val, name, tot, fp, le_60 ))
         elif nam == "M" or nam =="FP" : 
-            astr.append("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}".format(nam, val, name, tot, fp ))
+            astr.append("{0:7} \t {2:5} \t ({3:4}) \t ({4:5}) \t {1:10}".format(nam, val, name, tot, fp ))
     astr.append(warning+str(wc))
+
+    # if I don't want to use excel, I can always create a new pandas data frame ... and sort. 
+
     return astr
+
+def down_list(astr, name = "/_logs_tr3" ):
+    file = md.LOGDAT +  name + ".txt" # + md.DESC +
+    f = open(file, 'w')
+    for line in astr:
+        f.write(line + "\n") 
+    f.close()       #close file
 
 def main1(): 
     print("hi1")
@@ -550,13 +560,16 @@ def main2():
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     get_tests(url_test, force, excel )
-    print_form( dsp.iloc[2]  )
+    print_form2( dsp.iloc[2]  )
+    astr =  get_components(   dsp.iloc[2] )
+    down_list(astr)
 
 def main3(): 
     mainRead2(ALL_DS, 1, 10, all = False, shuffle = True  ) ; normalize()
     print(dst["FP_P"])
     print(get_conv_list(  dst["FP_P"] )) 
+
 if __name__ == '__main__':
-    main3()
+    main2()
 
 
