@@ -75,7 +75,6 @@ class fpDAO(object):
     def create(self, data):        return "create"
     def update(self, id, data):    return "update"
     def delete(self, id):          return "delete"
-
 DAO = fpDAO()
 
 # _______________________
@@ -92,6 +91,10 @@ class fpPredList(Resource):
     @ns.expect(fp)
     @ns.marshal_with(fp, code=201)
     def post(self):
+        forml2 = api.payload["forml"]
+        forml2 = forml2.replace("'", '"'); print(forml2)
+        pred = DAO.get(forml2)
+        api.payload["pred"] = pred
         return api.payload
         # return DAO.create(api.payload), 201
         # EXAMPLE
@@ -135,6 +138,12 @@ def test_curl():
     # curl http://localhost:5000/123 -d "data='
     # { 'm':'PBV10476AS', '178583' :0.74598 , '106104' :0.1 , '182789' :0.04 , '130172' :0.035 , '179661' :0.035 , '164421' :0.018 , '600040' :0.0108 , '116165' :0.008 , '164419' :0.0018 , '103396' :0.001 , '130217' :0.001 , '131460' :0.001 , '690750' :0.0007 , '611089' :0.0006 , '130058' :0.0004 , '130354' :0.0002 , '131101' :0.0002 , '131435' :0.00012 , '131136' :0.0001 , '131315' :0.0001 }   
     # '" -X GET
+
+    # API.payload
+    # {
+    #   "hello": "{ 'm':'1', '100023' : 1 }",
+    #   "pred": "string"
+    # }
 
 def single_tests():
     """triple comment = treated as string """
@@ -228,6 +237,6 @@ def single_tests():
     md.print_form2(md.dsp.iloc[0])
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    # app.run(host="0.0.0.0")  # accessible from the network! 
-    # single_tests()   
+    # app.run(debug=True)
+    # app.run(host="0.0.0.0", debug=True)  # accessible from the network! 
+    single_tests()   
