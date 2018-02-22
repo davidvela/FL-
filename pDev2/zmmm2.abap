@@ -1,4 +1,11 @@
 
+*&---------------------------------------------------------------------*
+*& Report  ZMMM2
+*&        rest ws call 
+*
+*&---------------------------------------------------------------------*
+*&   22.02.2018 -  David Vela - Creation
+*&---------------------------------------------------------------------*
 REPORT zmmm2.
 
 PARAMETERS p_txt TYPE string DEFAULT 'WORLD'.
@@ -9,9 +16,10 @@ START-OF-SELECTION.
   NEW-LINE.
 *  RETURN.
   DATA: lo_http_client TYPE REF TO if_http_client,
-        lo_request     TYPE REF TO if_rest_entity,
-        lo_response    TYPE REF TO     if_rest_entity,
         lo_rest_client TYPE REF TO cl_rest_http_client,
+        lo_request     TYPE REF TO if_rest_entity,
+        lo_response    TYPE REF TO if_rest_entity,
+        
         lv_url         TYPE string,
         lv_body        TYPE string,
         token          TYPE string,

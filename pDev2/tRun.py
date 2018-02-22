@@ -6,6 +6,9 @@ import utils_data as md
 import numpy as np
 import pandas as pd
 
+rec_tests = True
+tsd       = pd.DataFrame()
+
 def get_models(type):
     if type == "FRFLO":
         return [
@@ -15,6 +18,13 @@ def get_models(type):
         ]
     elif type == "FRALL1":
         return [
+            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+        ]
+    elif type == "FLALL":
+            return [
             { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
             { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
@@ -36,7 +46,7 @@ def print_results(execc, typ = "pt"):
         
         f.write(line + "\t " +  str(gt3)  + "\n") 
     f.close()       #close file
-
+ 
 def print_line(execc, i, typ = "pt"): 
     promp = "m:{0:10} \tR-{1:5}   ||" .format(md.dsp.iloc[i,0], md.dsp.iloc[i,1])  
     promp = promp + str([ print_pred(execc[x], typ, i) for x in range(len(execc)) ]  )
@@ -49,12 +59,11 @@ def print_pred( ex , typ, i  ):
     else: return promp + "{0:2}".format(ex[typ][1][i][0])
 
 def mainRun(): 
+    global tsd
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
     final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1
     ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
-    execc = get_models(md.DESC)
-
     # DATA READ  ------------------------------------------------ 
     # md.mainRead2(ALL_DS, 1, 2 ) # , all = True, shuffle = True  ) 
     md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
@@ -65,6 +74,8 @@ def mainRun():
 
     # OPERATIONS  ------------------------------------------------ 
     # md.get_columns(force)
+    if rec_tests: tsd = md.dsp[["M", "FP"]]
+    execc = get_models(md.DESC)
     for ex in execc:
         md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
         
@@ -76,50 +87,36 @@ def mainRun():
         print(mr.model_path)    
         # ex["pe"] = mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
+        if rec_tests: tsd = record_data( ex, tsd, md.dsp, type = "pt")    
 
     # PRINTING  ------------------------------------------------ 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
     print_results(execc, typ = "pt") 
-    
     # DOWNLOAD ------------------------------------------------- 
-    # download_pandas(execc)
+    download_pandas( )
 
-def download_pandas(execc):
-    # DOWNLOAD EXCEL! ------------------------------------------------ 
-    # create a pandas and create new columns - like     
+def download_pandas( ):
     print("\nDownload pandas")
-    # return "hola"
-    
-    # 2 datasets: 
-    # evd = md.dst
-    for ex in execc:
-        tsd = md.dsp[["M", "FP"]]
-        # tsd["PRED"] = ex["pt"][1][i][0] # pred 1
-        # tsd[ex["dt"] + "_PRED"] = ex["pt"][1] # pred 1
-        # tsd[ex["dt"] + "_PROB"] = ex["pt"][0] # prob 
-        
-        # tsd.insert(2, '_PRED', ex["pt"][1].map(lambda x: str(x)))
-        # tsd.insert(3, '_PRED', np.array([str(xi[0]) for xi in ex["pt"][1]])  )
-        tsd.to_csv(md.LOGDAT + "testDS.csv")
+    if rec_tests: tsd.to_csv(md.LOGDAT + "testDS.csv")
+    return
+def record_data( ex, dsp, dspo, type = "pt"  ):
+    # print(len(np.array([str(xi[0]) for xi in ex["pt"][1]])));     print(len(tsd.columns))
+    # tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', dsp2["FP_P"].map(lambda x: dc( x ) )    )
+    #tsd[ "_PRED"] = np.array([str(xi[0]) for xi in ex["pt"][1]])  # pandas warnings! 
+    dsp.insert(len(dsp.columns), ex["dt"] + '_FP_P',  dspo["FP_P"].map(lambda x: md.dc( x ) ))    
+    dsp.insert(len(dsp.columns), ex["dt"] + '_PRDU',  np.array([int(xi[0])   for xi in ex[type][1]])  )    
+    dsp.insert(len(dsp.columns), ex["dt"] + '_PRED',  np.array([str(xi)      for xi in ex[type][1]])  )    
+    dsp.insert(len(dsp.columns), ex["dt"] + '_PROB',  np.array([str(xi)      for xi in ex[type][0]])  )    
+    # error calc: 
+    if ex["dt"] == "C1":
+        dsp.insert(len(tsd.columns), ex["dt"] + '_ERR', 
+                #( dsp.loc[:, ex["dt"] + '_FP_P'] == dsp.loc[:,ex["dt"] +'_PRDU']  )   )  
+                np.array([ abs(dsp.loc[i,ex["dt"] +'_PRDU']-dsp.loc[i,ex["dt"] +'_FP_P'])>3 for i in range(len(dsp))  ])  )   
+    else:
+        dsp.insert(len(tsd.columns), ex["dt"] + '_ERR', ( dsp.loc[:, ex["dt"] + '_FP_P'] == dsp.loc[:,ex["dt"] +'_PRDU']  )  )   
+    return dsp
 
 if __name__ == '__main__':
     mainRun()
 
-tsd = md.dsp[["M", "FP"]]
-tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', md.dsp["FP_P"].map(lambda x: md.dc( x ) ))    
 
-# for ex in execc:
-def record_d( ex, dsp, type = "pt"  ):
-    # print(len(np.array([str(xi[0]) for xi in ex["pt"][1]])));     print(len(tsd.columns))
-    # tsd.insert(len(tsd.columns), ex["dt"] + 'FP_P', dsp2["FP_P"].map(lambda x: dc( x ) )    )
-    #tsd[ "_PRED"] = np.array([str(xi[0]) for xi in ex["pt"][1]])  # pandas warnings! 
-    dsp.insert(len(tsd.columns), ex["dt"] + '_PREDU', np.array([str(xi[0])  for xi in ex[type][1]])  )    
-    dsp.insert(len(tsd.columns), ex["dt"] + '_PRED', np.array([str(xi)      for xi in ex[type][1]])  )    
-    dsp.insert(len(tsd.columns), ex["dt"] + '_PROB', np.array([str(xi)      for xi in ex[type][0]])  )    
-
-    # error calc: 
-    #dsp[ex["dt"] + '_ERR'] = dsp.[[ex["dt"] + '_PREDU']] == 
-
-tds = record_d( ex, tsd, type = "pt")    
-#tsd.to_csv(md.LOGDAT + "testDSJ.csv")
-tsd.head()

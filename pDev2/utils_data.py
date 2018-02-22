@@ -30,7 +30,7 @@ DL         = "/datal.csv"
 filter     = ["", 0]
 type_sep   = False
 
-DESC       = "FRFLO" ; pp_abs = False
+DESC       = "FRaFLO" ; pp_abs = False
 spn        = 5000  
 dType      = "C4" #C1, C2, C4
 
@@ -56,6 +56,7 @@ flag_dsc = True
 
 def setDESC(pDESC): 
     global COL_DS, ALL_DS, ALL_DSJ, DESC, pp_abs
+    print("set desc!")
     DESC = pDESC
     COL_DS     = LOGDAT + DESC + DC 
     ALL_DSJ    = LOGDAT + DESC + DSJ 
@@ -422,7 +423,7 @@ def get_columns(force=False, pp_excel = False, p_dst=True):
         # df_entry[] = 1
         
 
-def testsJ(excel):
+def testsJ(excel): # old version
     print("tests JSON")    
     dataAll = {'label' : [] , 'data' :  [] }
     json_flag = True    
@@ -443,12 +444,13 @@ def testsJ(excel):
 # ll_st = 0; ll_en=10000; #ll_en=20000; 26000; 32000; 38000; 44000; 
 ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
 # ll_st = 0; ll_en = 10;
-def testsJ2(excel=True, split = False, pTest = True):
+def testsJ2(excel=True, pdesc, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
     # url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
-    setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    url_test = LOGDAT + pdesc + "/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest:                                               #   disp   all
         get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
@@ -457,8 +459,7 @@ def testsJ2(excel=True, split = False, pTest = True):
     
     # del tmp['FP_P']
 
-    if split: 
-        pass # separate betweent TR and EV     
+    if split: pass # separate betweent TR and EV     
 
     print("data read - time:{}" .format(float(time.time() - start) ))
     down_excel(tmp,  excel)
@@ -553,8 +554,10 @@ def down_list(astr, name = "/_logs_tr3" ):
 def main1(): 
     print("hi1")
     # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
+    pDesc = "FLALL"
+    setDESC(pDesc);
     mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    testsJ2(excel=True, split = False, pTest = True)
+    testsJ2(excel=True, split = False, pTest = False)
 
 def main2():
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
@@ -570,6 +573,7 @@ def main3():
     print(get_conv_list(  dst["FP_P"] )) 
 
 if __name__ == '__main__':
-    main2()
+    main1()
+
 
 

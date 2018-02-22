@@ -410,7 +410,7 @@ def calc_confusion_m( sf, dst, tid="t"):
 
 
 #--------------------------------------------------------------
-md.DESC      = "FRALL1" # "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
+md.DESC      = "FLALL" # FLALL "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
 ex =  { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100],       "spn": 10000, "pe": [], "pt": []  }
 # ex =  { 'dt':'C1',  "e":200, "lr":0.001, "h":[100 , 100, 100], "spn": 10000, "pe": [], "pt": []  }
 
@@ -441,8 +441,8 @@ def mainRun():
     model_path = md.MODEL_DIR + "model.ckpt" 
     force = False        
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
-    md.get_tests(url_test=url_test, force=force, pp_excel=True)
-    md.get_columns(force, True)
+    # md.get_tests(url_test=url_test, force=force, pp_excel=True)
+    md.get_columns(force, True) # True => read from excel...
 
     #---------------------------------------------------------------
     # NETWORK
@@ -459,7 +459,7 @@ def mainRun():
     train(epochs, disp, batch_size, True)
     evaluate( )
     
-    tests(url_test, p_col=False  )
+    # tests(url_test, p_col=False  )
     vis_chart( )  # visualize the training chart
     print("___The end!")
 
