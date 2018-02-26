@@ -354,7 +354,7 @@ def vis_chart( ):
     plt.title("Accuracy" + md.MODEL_DIR)
     plt.legend()
     # plt.savefig(md.MODEL_DIR + "/chart.png" )
-    plt.savefig(md.LOGDAT + md.MODEL +  ".png" )
+    plt.savefig(md.MODEL_DIR + ".png" )
     # plt.show()
     return
 

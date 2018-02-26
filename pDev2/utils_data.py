@@ -196,7 +196,7 @@ def mainRead(filt=["", 0]):
     return ninp, nout
 
 def mainRead2(path, part, batch_size,  all = True, shuffle = True):  # read by partitions! 
-    global spn, dst #ninp, nout, dataT, dataE, spn;
+    global spn, dst #ninp, nout, dataT, K)dataE, spn;
     start = time.time()
     if all:  dst = pd.read_csv( tf.gfile.Open(path), sep=None, skipinitialspace=True,  engine="python" )
     else:     
@@ -550,7 +550,7 @@ def get_components(ds):
 
     return astr
 
-def down_list(astr, name = "/_logs_tr3" ):
+def down_list(astr, name = "/_logs_tr3_comps" ):
     file = md.LOGDAT +  name + ".txt" # + md.DESC +
     f = open(file, 'w')
     for line in astr:
