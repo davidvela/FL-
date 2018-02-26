@@ -38,7 +38,8 @@ dType      = "C4" #C1, C2, C4
 # spn        = 10000  #5000 -1 = all for training 
 
 #---------------------------------------------------------------------
-MODEL_DIR  = LOGDIR + DESC + '/'   
+MODEL      = "lr_1E-03_NN1814x100x40x4_ep10FF"
+MODEL_DIR  = LOGDIR + DESC + MODEL #+ '/'   
 
 # LAB_DS     = LOGDAT + DESC + DL # NOT USED!
 COL_DS     = LOGDAT + DESC + DC 
@@ -318,22 +319,27 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
             if key != "m": 
                 # key_wz = key if pp_abs else int(key)  #str(int(key)) FRFLO - int // FRALL str!
                 
-                if isInt : key_wz = int(key)  # if comp NOT conatin letters
-                else: key_wz = str(key)       # if comp contains letters
-                                
+                if isInt : key_wz = int(key)            # if comp NOT conatin letters
+                else: key_wz = str(key) #str(key)       # if comp contains letters
+                # print(type(key))                
                 try: #filling of key - experimental or COMP 
                     if d_st:
                         ds_comp = col_df.loc[key_wz] #print(ds_comp) # THIS IS THE MOST TIME CONSUMING OP. 
                         col_key = ds_comp.cc if pp_abs else  str(ds_comp.name) #
                     else: 
                         col_key = int(key) #str(int(key)) 
-                    col_key = int(col_key)
+                    
+                    col_key = str(col_key) # or int... 
+                    #if isInt : col_key = int(col_key)     # if comp NOT conatin letters
+                    #else: key_wz = col_key = str(col_key)   
+
                     df_entry[col_key] =  np.float32(json_data[i][key]) # df_entry.loc[col_key]
                     # print(col_key); print(type(col_key))
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
         # ONLY USED TO CONVERT JSON TO EXCEL => EXCEL WILL BE SMALLER
-        # df_entry = df_entry.replace(0, np.nan) # DANGER !!! 
+        df_entry = df_entry.replace(0, np.nan) # DANGER !!! 
+
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
     print("Counter of comp. not included :"); print(ccount) # print(len(ccount))
@@ -444,18 +450,18 @@ def testsJ(excel): # old version
 # ll_st = 0; ll_en=10000; #ll_en=20000; 26000; 32000; 38000; 44000; 
 ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
 # ll_st = 0; ll_en = 10;
-def testsJ2(excel=True, pdesc, split = False, pTest = True):
+def testsJ2(pDesc, excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
 
     # url_test = LOGDAT + "FREXP1/" ; dataFile = "data_jsonX.txt";  labelFile = "datalX.csv" ;   #url_test = "url"
     # setDESC("FLALL2"); url_test = LOGDAT + "FLALL2/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
-    url_test = LOGDAT + pdesc + "/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
+    url_test = LOGDAT + pDesc + "/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest:                                               #   disp   all
         get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
     else: 
-        get_columns(False, False, False); tmp = dsc
+        get_columns(False, False, True); tmp = dsc
     
     # del tmp['FP_P']
 
@@ -557,7 +563,7 @@ def main1():
     pDesc = "FLALL"
     setDESC(pDesc);
     mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    testsJ2(excel=True, split = False, pTest = False)
+    testsJ2(pDesc = pDesc, excel=True, split = False, pTest = False)
 
 def main2():
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"

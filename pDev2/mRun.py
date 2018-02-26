@@ -160,17 +160,23 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
 
     dataTest = {'label' : [] , 'data' :  [] };
     if compt: 
-        md.get_columns(pp_excel = True )  #md.dsc or dataset? 
+        md.get_columns(pp_excel = True )  # True! #md.dsc or dataset? 
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
 
         
-    print("data read - lenTrain={}-{} & lenEv={}-{}" .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
+    print("data read - lenTrain={}-{} & lenEv={}-{}, col = {}" 
+            # .format(len(md.dataT["data"]), len(md.dataT["label"]),len(md.dataE["data"]),len(md.dataE["label"]) ))
+            .format(len(md.dst.iloc[md.spn:, 3:]), len(md.dst.loc[md.spn:,'FP_P']),
+            len( md.dst.iloc[:md.spn, 3:] ),len( md.dst.loc[:md.spn-1,'FP_P'] ), 
+            len(dataTest['data'])
+             ))
+    
     total_batch  = int(len(md.dataT['label']) / batch_size)   
     startTime = datetime.now().strftime('%H:%M:%S')
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         # restore_model(sess)  #Run if I want to retrain an existing model  
-        writer = tf.summary.FileWriter(md.MODEL_DIR + "tboard/", sess.graph ) # + get_hpar() )
+        writer = tf.summary.FileWriter(md.MODEL_DIR + "/tboard/", sess.graph ) # + get_hpar() )
 
         start = time.time()
         for i in range(it):            
@@ -212,6 +218,10 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
     logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
     dataTest = {'label' : [] , 'data' :  [] };
+
+
+def train_opt( ): 
+    pass
 
 def evaluate( ): 
     print("_____EVALUATION...")
@@ -343,7 +353,8 @@ def vis_chart( ):
     plt.plot(test_accuracies, label='Test', alpha=0.5)
     plt.title("Accuracy" + md.MODEL_DIR)
     plt.legend()
-    plt.savefig(md.MODEL_DIR + "chart.png" )
+    # plt.savefig(md.MODEL_DIR + "/chart.png" )
+    plt.savefig(md.LOGDAT + md.MODEL +  ".png" )
     # plt.show()
     return
 
@@ -411,7 +422,7 @@ def calc_confusion_m( sf, dst, tid="t"):
 
 #--------------------------------------------------------------
 md.DESC      = "FLALL" # FLALL "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
-ex =  { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100],       "spn": 10000, "pe": [], "pt": []  }
+ex =  { 'dt':'C4',  "e":100, "lr":0.001, "h":[40 , 40],       "spn": 10000, "pe": [], "pt": []  }
 # ex =  { 'dt':'C1',  "e":200, "lr":0.001, "h":[100 , 100, 100], "spn": 10000, "pe": [], "pt": []  }
 
 md.spn       = ex["spn"] 
@@ -432,13 +443,15 @@ def mainRun():
     # DATA READ 
     #---------------------------------------------------------------
     ALL_DS     = md.LOGDAT + md.DESC + md.DSC 
+    md.setDESC(md.DESC)
     md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     # md.mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     md.normalize()
     ninp, nout, top_k = md.getnn()
     # print(len(md.dst))
-    md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + get_hpar(epochs, final=final) +"/" 
-    model_path = md.MODEL_DIR + "model.ckpt" 
+    md.MODEL =  get_hpar(epochs, final=final)
+    md.MODEL_DIR = md.LOGDIR + md.DESC + '/' + md.MODEL  #+"/" 
+    model_path = md.MODEL_DIR + "/model.ckpt" 
     force = False        
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
     # md.get_tests(url_test=url_test, force=force, pp_excel=True)
@@ -471,6 +484,8 @@ def mainRun():
     #   modify the train function - optimization 
 
 
+def mainOPT(): 
+    pass
 
 if __name__ == '__main__':
     mainRun()

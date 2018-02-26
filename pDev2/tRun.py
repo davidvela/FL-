@@ -6,11 +6,12 @@ import utils_data as md
 import numpy as np
 import pandas as pd
 
-rec_tests = True
+rec_tests = False
 tsd       = pd.DataFrame()
+tse       = pd.DataFrame()
 
 def get_models(type):
-    if type == "FRFLO":
+    if   type == "FRFLO":
         return [
             { 'dt':'C2',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
             { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": []  },
@@ -18,16 +19,16 @@ def get_models(type):
         ]
     elif type == "FRALL1":
         return [
-            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C2',  "e":40,  "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":100, "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":100, "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
         ]
     elif type == "FLALL":
             return [
-            { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
-            { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 40000, "pe": [], "pt": []  },
+            { 'dt':'C2',  "e":100, "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C4',  "e":200, "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
+            { 'dt':'C1',  "e":200, "lr":0.0001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
         ]
     else: return []
@@ -61,7 +62,8 @@ def print_pred( ex , typ, i  ):
 def mainRun(): 
     global tsd
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1
+    final = "_" ;  md.DESC = "FRALL1";  # FRFLO   FRALL1 FLALL
+    md.setDESC(md.DESC)
     ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
     # DATA READ  ------------------------------------------------ 
@@ -73,7 +75,7 @@ def mainRun():
     md.get_tests(url_test, force, excel )
 
     # OPERATIONS  ------------------------------------------------ 
-    # md.get_columns(force)
+    md.get_columns(force=force, pp_excel=True)
     if rec_tests: tsd = md.dsp[["M", "FP"]]
     execc = get_models(md.DESC)
     for ex in execc:
@@ -84,9 +86,13 @@ def mainRun():
         md.MODEL_DIR = md.LOGDIR + md.DESC + '/'   + mr.get_hpar(mr.epochs, final=final) +"/" 
         mr.model_path = md.MODEL_DIR + "model.ckpt" 
         mr.build_network3()                                                                                                                                                                                                                                                                                    
-        print(mr.model_path)    
-        # ex["pe"] = mr.evaluate( )
-        ex["pt"] = mr.tests(url_test, p_col=False  )
+        print(mr.model_path) 
+        mr.clean_traina()
+
+        mr.train(it= ex["e"], disp=True, batch_size = 128, compt = True)
+        ex["pe"] = mr.evaluate( )
+        mr.vis_chart( ) # visualize the training chart
+        # ex["pt"] = mr.tests(url_test, p_col=False  )
         if rec_tests: tsd = record_data( ex, tsd, md.dsp, type = "pt")    
 
     # PRINTING  ------------------------------------------------ 
