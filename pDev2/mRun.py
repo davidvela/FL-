@@ -305,24 +305,20 @@ def tests_exec(url_test = 'url'):
     dataTest = {'label' : [] , 'data' :  [] }; pred_val = []
     # md.get_tests(url_test) #dsp
     tmpLab = [1] # dummy 
-
     json_str = url_test
-    
-    print(json_str)
+    # print(json_str)
     if json_str[0]=="'": 
         json_str = json_str[1:]
         if json_str[len(json_str)-1]=="'": json_str = json_str[:len(json_str)-1]
         json_str = json_str.replace("'", '"')
-
     json_str = "[" + json_str + "]" 
-    print(json_str)
-   
     # json_str =   '''{ "m":"1", "100023" : 1 }  ''';  json_str = "[" + json_str + "]" 
     # print(json_str)
-
     json_data = json.loads(json_str)
-    print(json_data)
+    # print(json_data)
     md.dsp = md.feed_data(json_data ,pand=True, d_st=True, p_all = True)       #d_st = display status
+    ds = md.dsp.iloc[0]
+    if len(ds.iloc[ds.nonzero()]) == 1: return "error: comp 0"
     md.dsp["FP"] = tmpLab; 
     md.dsp.insert(2, 'FP_P', md.dsp['FP'].map(lambda x: md.cc( x )))
     dataTest['data']  = md.dsp.iloc[:, 3:].as_matrix().tolist();   # No FP

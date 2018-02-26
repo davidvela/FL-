@@ -6,7 +6,8 @@ import utils_data as md
 import numpy as np
 import pandas as pd
 
-rec_tests = False
+rec_eval = False
+rec_test = False
 tsd       = pd.DataFrame()
 tse       = pd.DataFrame()
 
@@ -77,7 +78,9 @@ def mainRun():
     mr.final = "_" #_ _101
     # OPERATIONS  ------------------------------------------------ 
     md.get_columns(force=force, pp_excel=True)
-    if rec_tests: tsd = md.dsp[["M", "FP"]]
+    if rec_test: tsd = md.dsp[["M", "FP"]]
+    if rec_eval: tse = md.dst.iloc[:md.spn, :2]
+
     execc = get_models(md.DESC)
     for ex in execc:
         md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
@@ -98,7 +101,8 @@ def mainRun():
         
         ex["pt"] = mr.tests(url_test, p_col=False  )
         
-        if rec_tests: tsd = record_data( ex, tsd, md.dsp, type = "pt")    
+        if rec_test: tsd = record_data( ex, tsd, md.dsp, type = "pt")    
+        if rec_eval: tse = record_data( ex, tse, md.dst.iloc[:md.spn, :3], type = "pe")    
 
     # PRINTING  ------------------------------------------------ 
     print("end!___" +  datetime.now().strftime('%H:%M:%S')  )
@@ -108,7 +112,8 @@ def mainRun():
 
 def download_pandas( ):
     print("\nDownload pandas")
-    if rec_tests: tsd.to_csv(md.LOGDAT + "testDS.csv")
+    if rec_test: tsd.to_csv(md.LOGDAT + "ttestDS.csv")
+    if rec_eval: tsd.to_csv(md.LOGDAT + "tevalDS.csv")
     return
 def record_data( ex, dsp, dspo, type = "pt"  ):
     # print(len(np.array([str(xi[0]) for xi in ex["pt"][1]])));     print(len(tsd.columns))

@@ -126,6 +126,11 @@ def dc(df, val = 1 ):
         except: val = 0 
     return val
 
+def normalize(opt = 1):     
+    if opt == 0 or opt == 1: dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
+    if (not flag_dsp) or opt == 0 or opt == 2 : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
+    if (not flag_dsc) or opt == 0 or opt == 3: dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
+
 def get_conv_list(dst): 
     return  dst.map(lambda x: dc(x, 1)) #dc( dataEv[i])
 
@@ -138,11 +143,6 @@ def read_data2(path): #NOT USED
     # dst = dst.fillna(0)
     # dst.insert(2, 'FP_P', dst['FP'].map(lambda x: cc(x)))  
     
-def normalize(opt = 1):     
-    if opt == 0 or opt == 1: dst['FP_P'] = dst['FP'].map(lambda x: cc( x ))
-    if (not flag_dsp) or opt == 0 or opt == 2 : dsp['FP_P'] = dsp['FP'].map(lambda x: cc( x ))
-    if (not flag_dsc) or opt == 0 or opt == 3: dsc['FP_P'] = dsc['FP'].map(lambda x: cc( x ))
-
 def read_data1(data_path,  typeSep = True, filt = "", filtn = 0, pand=True, shuffle = True): 
     global dataT; global dataE;
     #read excel by batchs
@@ -265,7 +265,7 @@ def comp_perf( val, pred, dType='C1'):
     return gt3, gtM 
 
 #FD
-def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
+def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True, p_down=False):
     #index_col=0 if p_abs else 2 #abs=F => 2 == 6D
     index_col = 2 #name - num, abs = cc
     # col_df = pd.read_csv(COL_DS, index_col=index_col, sep=',', usecols=[0,1,2,3])    
@@ -329,7 +329,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
                     else: 
                         col_key = int(key) #str(int(key)) 
                     
-                    col_key = str(col_key) # or int... 
+                    col_key = int(col_key) # or int... 
                     #if isInt : col_key = int(col_key)     # if comp NOT conatin letters
                     #else: key_wz = col_key = str(col_key)   
 
@@ -338,7 +338,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True):
                 except: 
                     if d_st: print("m:{}-c:{} not included" .format(m, key_wz)); ccount[key_wz] +=1
         # ONLY USED TO CONVERT JSON TO EXCEL => EXCEL WILL BE SMALLER
-        df_entry = df_entry.replace(0, np.nan) # DANGER !!! 
+        if p_down: df_entry = df_entry.replace(0, np.nan) # DANGER !!! 
 
         json_df = json_df.append(df_entry,ignore_index=False)
         if i % 1000 == 0: print("cycle: {}".format(i))
@@ -519,7 +519,7 @@ def print_form2(ds):
             print("{0:7} -{2:5} ({3:4})--({4:5}) - {1:10}".format(nam, val, name, tot, fp ))
     print(warning+str(wc))
 
-def get_components(ds): 
+def get_components(ds): # return list of components
     col_df = pd.read_csv( COL_DS , index_col=2, sep=',', usecols=[0,1,2,3], encoding = "ISO-8859-1")   # ,4 = NAM
     astr = []; fstr =  ''
     comp = len(ds.iloc[ds.nonzero()])
