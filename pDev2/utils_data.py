@@ -557,6 +557,25 @@ def down_list(astr, name = "/_logs_tr3_comps" ):
         f.write(line + "\n") 
     f.close()       #close file
 
+def get_json_format( type, pp , pr ): 
+    dic = {}
+    val = get_c2_c4_texts()
+    for i in range(len(pp)): 
+        # dv = val[type][str(pp[i])] + "-" + "{:.2f}".format(pr[i]*100)
+        # dv = val[type][pp[i]] + "-" + "{:.2f}".format(pr[i]*100)
+        dv =str(pp[i]) + "-" + "{:.2f}".format(pr[i]*100)
+        # print(dv)
+        dic["pred"+type+"_"+str(i)] = dv
+    return dic 
+
+def get_c2_c4_texts(): 
+    return {    
+            "C2": { 0: "<60", 1: ">60"},
+            "C4": { 0: "<23", 1: "23<x<60", 2: "60<x<93", 3: ">93",    }
+    }
+
+
+
 def main1(): 
     print("hi1")
     # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
@@ -577,6 +596,18 @@ def main3():
     mainRead2(ALL_DS, 1, 10, all = False, shuffle = True  ) ; normalize()
     print(dst["FP_P"])
     print(get_conv_list(  dst["FP_P"] )) 
+
+def main4(): # test get json_format 
+    test = {"hello":"world"}
+    c2pp = [1, 0]
+    c2pr = [1.00000000e+00, 1.29633505e-14]
+    prdd = get_json_format("C2", c2pp, c2pr)
+    print(prdd)
+    #for key in prdd: 
+    for key, val in prdd.items(): 
+        print("{}-{}".format(key,val))
+    test.update(prdd)
+    print(test)
 
 if __name__ == '__main__':
     main1()

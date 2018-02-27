@@ -338,6 +338,7 @@ def tests_exec(url_test = 'url'):
     logr( it=0, typ='AP', DS=md.DESC, AC=sf[1][0] ,num=sf[0][0],  AC3=0, AC10="real?", desc=str(md.dsp.iloc[0,0] ) )  
     # logr( it=0, typ='TS', DS=md.DESC, AC=ts_acn ,num=len(dataTest["label"]),  AC3=gt3, AC10=gtM, desc=md.des() )  
     return "PP: {} PR: {}".format(sf[1][0], sf[0][0] )
+    # md.get_json_format(sf[1][0], sf[0][0] )
 
 def clean_traina():
     global train_accuracies, test_accuracies
