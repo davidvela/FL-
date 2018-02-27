@@ -395,11 +395,11 @@ def get_form_av(dst):
     dsv = [ len(ds.nonzero()[0]) for i, ds in dst.iterrows()]
     print("mean: {},  max: {}, min: {} ".format( np.mean(dsv),np.max(dsv), np.min(dsv)  ))
 
-def repl_col4One_z(dst, com):  #WHEN NULL 
+def repl_col4One_z(dst, com):  #WHEN ZERO 
     # dst.iloc[dst[com][pd.isnull(dst.iloc[:,2]) == False].index  , 2 ]
     # dst[ (dst[[com]]!=0).values ][com] 
     dsl = dst[ (dst[[com]]!=0).values ][[com]] 
-    # dsl.iloc[:] = 1
+    # dsl.iloc[:] = 1 ; print(dsl)
     dst.iloc[dsl.index] = 1
     return dst
 #__________________________________
@@ -427,8 +427,7 @@ def paint(data, component):
     plt.legend()
     plt.show()
 
-
-def vis_comp(com):
+def vis_comp(dst, com):
     # dst.columns[2:4]
     dst["FPP"] = dst['FP'].map(lambda x: cc(x, rv=2))
     dstt = dst[["M", "FPP", com]]
@@ -451,18 +450,17 @@ def main1():
     mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     # testsJ2(pDesc = pDesc, excel=True, split = False, pTest = False)
 
-def main2(): 
+def main2():  # visualization
     com = "160102" #c922 - 160102 - 121 dipropylene glycol 
     com = "131104" #c738 - 131104 - 44  hexenol cis 3 
-    com = "100023"
+    # com = "100023"
     # print_form2(dst[dst["M"]==100456].iloc[0])
     total = len(dst)
     null = total - len(dst[com].nonzero()[0]) #for zeros 
     # null = total - sum(pd.isnull(dst[com]))
     print( "total = {} and com: {} = {} null  ".format(total,com, null))
-    
-    vis_comp(com)
-
+    vis_comp(dst, com)
+    repl_col4One_z(dst, com)
 
 def main3(): 
     ds =  dst.iloc[1]
