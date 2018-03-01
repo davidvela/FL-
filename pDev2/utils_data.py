@@ -611,10 +611,10 @@ def main4(): # test get json_format
     print(dic_t)
 
     # how to update - fields with same name in two different arrays. 
-    
+
 
 if __name__ == '__main__':
-    main1()
+    main4()
 
 
 
