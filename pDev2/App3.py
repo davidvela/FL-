@@ -20,13 +20,25 @@ def app_config():
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='FP API',   description='Prototype to Predict FP API', )
 ns = api.namespace('fp', description='FP Operations')
+
+#model _______________________________
 fp = api.model('fp', {
     #'id': fields.Integer(readOnly=True, description='The fp unique identifier'),
     'forml' : fields.String(required=True, description='The form details'),
     'pred'  : fields.String(required= False,description='Prediction C2') , #all - basic
-    'predC2': fields.String(required= False,description='Prediction C2') ,
-    'predC4': fields.String(required= False,description='Prediction C4') ,
-    'predC1': fields.String(required= False,description='Prediction C1') })
+    'predC2_0': fields.String(required= False,description='Prediction C2') ,
+    'predC2_1': fields.String(required= False,description='Prediction C2') ,
+    'predC4_0': fields.String(required= False,description='Prediction C4') ,
+    'predC4_1': fields.String(required= False,description='Prediction C4') ,
+    'predC4_2': fields.String(required= False,description='Prediction C4') ,
+    'predC4_3': fields.String(required= False,description='Prediction C4') ,
+    'predC1_0': fields.String(required= False,description='Prediction C1') 
+    'predC1_1': fields.String(required= False,description='Prediction C1') 
+    'predC1_2': fields.String(required= False,description='Prediction C1') 
+    'predC1_3': fields.String(required= False,description='Prediction C1') 
+    'predC1_4': fields.String(required= False,description='Prediction C1') 
+    'predC1_5': fields.String(required= False,description='Prediction C1') 
+})
 
 def get_models(type):
     if type == "FRFLO":

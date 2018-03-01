@@ -442,7 +442,7 @@ def vis_comp(dst, com):
 # MAIN! 
 #__________________________________
 
-def main1(): 
+def main1():    # convert json2excel_base
     print("hi1")
     # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     pDesc = "FLALL"
@@ -450,7 +450,7 @@ def main1():
     mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     # testsJ2(pDesc = pDesc, excel=True, split = False, pTest = False)
 
-def main2():  # visualization
+def main2():    # visualization of components
     com = "160102" #c922 - 160102 - 121 dipropylene glycol 
     com = "131104" #c738 - 131104 - 44  hexenol cis 3 
     # com = "100023"
@@ -462,25 +462,22 @@ def main2():  # visualization
     vis_comp(dst, com)
     repl_col4One_z(dst, com)
 
-def main3(): 
+def main3():    # components selection
     ds =  dst.iloc[1]
     print(len(ds.iloc[ds.nonzero()]))
     # print(ds.iloc[ds.nonzero()])
     # print(*ds.iloc[ds.nonzero()].index)
     # print(*ds.iloc[ds.nonzero()])
-    
-    
+
     form = 100456
     dsf = dst[dst["M"] == form]
     print(dsf)
 
-
-
-def main4():     
+def main4():     # Average comp 
     print("average of comp no in all the formulas:")
     get_form_av(dst)
 
-
+#main
 if __name__ == '__main__':
     mainRead2(ALL_DS, 1, 2, all = True, shuffle = False ) 
     main2()

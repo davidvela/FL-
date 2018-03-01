@@ -574,9 +574,7 @@ def get_c2_c4_texts():
             "C4": { 0: "<23", 1: "23<x<60", 2: "60<x<93", 3: ">93",    }
     }
 
-
-
-def main1(): 
+def main1(): # test convert json2column_base
     print("hi1")
     # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
     pDesc = "FLALL"
@@ -584,7 +582,7 @@ def main1():
     mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
     testsJ2(pDesc = pDesc, excel=True, split = False, pTest = False)
 
-def main2():
+def main2(): # test print components
     url_test = LOGDAT + "FREXP1/" ; # url_test = "url"
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     get_tests(url_test, force, excel )
@@ -592,22 +590,28 @@ def main2():
     astr =  get_components(   dsp.iloc[2] )
     down_list(astr)
 
-def main3(): 
+def main3(): # test read FP 10 lines
     mainRead2(ALL_DS, 1, 10, all = False, shuffle = True  ) ; normalize()
     print(dst["FP_P"])
     print(get_conv_list(  dst["FP_P"] )) 
 
 def main4(): # test get json_format 
-    test = {"hello":"world"}
+    dic_t = {"hello":"world"}
     c2pp = [1, 0]
     c2pr = [1.00000000e+00, 1.29633505e-14]
+    
     prdd = get_json_format("C2", c2pp, c2pr)
     print(prdd)
+    
     #for key in prdd: 
     for key, val in prdd.items(): 
         print("{}-{}".format(key,val))
-    test.update(prdd)
-    print(test)
+    
+    dic_t.update(prdd) # expand dictionary! 
+    print(dic_t)
+
+    # how to update - fields with same name in two different arrays. 
+    
 
 if __name__ == '__main__':
     main1()
