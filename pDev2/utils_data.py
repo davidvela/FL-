@@ -565,8 +565,11 @@ def get_json_format( type, pp , pr ):
         # dv = val[type][pp[i]] + "-" + "{:.2f}".format(pr[i]*100)
         dv =str(pp[i]) + "-" + "{:.2f}".format(pr[i]*100)
         # print(dv)
-        dic["pred"+type+"_"+str(i)] = dv
+        dic["PRED_"+type+"_"+str(i)] = dv
     return dic 
+
+def get_print_format( pp, pr):
+    pass 
 
 def get_c2_c4_texts(): 
     return {    
