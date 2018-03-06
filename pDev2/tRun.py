@@ -62,7 +62,7 @@ def print_pred( ex , typ, i  ):
 def mainRun(): 
     global tsd
     print("___Start!___" +  datetime.now().strftime('%H:%M:%S')  )
-    md.DESC = "FRALL1";  # FRFLO   FRALL1    FLALL
+    md.DESC = "FLALL";  # FRFLO   FRALL1    FLALL
     md.setDESC(md.DESC)
     ALL_DS = md.LOGDAT + md.DESC + md.DSC 
     
@@ -92,7 +92,7 @@ def mainRun():
         print(mr.model_path) 
         mr.clean_traina()
 
-        mr.train(it= ex["e"], disp=True, batch_size = 128, compt = True)
+        # mr.train(it= ex["e"], disp=True, batch_size = 128, compt = True)
         ex["pe"] = mr.evaluate( )
         mr.vis_chart( ) # visualize the training chart
         
