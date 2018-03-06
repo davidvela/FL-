@@ -24,18 +24,19 @@ ns = api.namespace('fp', description='FP Operations')
 #model _______________________________
 fp = api.model('fp', {
     #'id': fields.Integer(readOnly=True, description='The fp unique identifier'),
-    'forml'   : fields.String(required=True, description='The form details'),
-    'pred'    : fields.String(required= False,description='Prediction C2')  ,   #all - basic
-    'predC2_0': fields.String(required= False,description='Prediction C2')  ,
-    'predC2_1': fields.String(required= False,description='Prediction C2')  ,
-    'predC4_0': fields.String(required= False,description='Prediction C4')  ,
-    'predC4_1': fields.String(required= False,description='Prediction C4')  ,
-    'predC4_2': fields.String(required= False,description='Prediction C4')  ,
-    'predC1_0': fields.String(required= False,description='Prediction C1')  ,
-    'predC1_1': fields.String(required= False,description='Prediction C1')  ,
-    'predC1_2': fields.String(required= False,description='Prediction C1')  ,
-    'predC1_3': fields.String(required= False,description='Prediction C1')  ,
-    'predC1_4': fields.String(required= False,description='Prediction C1')  
+    'FORML'    : fields.String(required=True, description='The form details'),
+    'RET_STR'  : fields.String(required=True, description='return string or not'),
+    'PRED'     : fields.String(required= False,description='Prediction C2')  ,   #all - basic
+    'PRED_C2_0': fields.String(required= False,description='Prediction C2')  ,
+    'PRED_C2_1': fields.String(required= False,description='Prediction C2')  ,
+    'PRED_C4_0': fields.String(required= False,description='Prediction C4')  ,
+    'PRED_C4_1': fields.String(required= False,description='Prediction C4')  ,
+    'PRED_C4_2': fields.String(required= False,description='Prediction C4')  ,
+    'PRED_C1_0': fields.String(required= False,description='Prediction C1')  ,
+    'PRED_C1_1': fields.String(required= False,description='Prediction C1')  ,
+    'PRED_C1_2': fields.String(required= False,description='Prediction C1')  ,
+    'PRED_C1_3': fields.String(required= False,description='Prediction C1')  ,
+    'PRED_C1_4': fields.String(required= False,description='Prediction C1')  
 })
 
 def get_models(type):
@@ -45,20 +46,21 @@ def get_models(type):
             { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": [], "ninp":1814  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 5000, "pe": [], "pt": [], "ninp":1814  },
         ]
-    elif type == "FRALL2":
+    elif type == "FRALL1":
         return [
             { 'dt':'C2',  "e":40,  "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
             { 'dt':'C4',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
             { 'dt':'C1',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
             # { 'dt':'C0',  "e":100, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": []  },
         ]
-    elif type == "FRALL1":
+    elif type == "FRALL11":
             return [
             { 'dt':'C2',  "e":20, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
             { 'dt':'C4',  "e":50, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
             { 'dt':'C1',  "e":50, "lr":0.001, "h":[100 , 100], "spn": 10000, "pe": [], "pt": [], "ninp":2385  },
         ]
     else: return []
+
 
 class fpDAO(object):
     def __init__(self):
@@ -116,32 +118,36 @@ class fpPredList(Resource):
     @ns.doc('get dummy')
     @ns.marshal_list_with(fp)
     def get(self):
-        return {   "pred": "25",  "forml": "GET" }
+        return {   "PRED": "25",  "FORML": "GET" }
 
     @ns.doc('post form and get fp')
     @ns.expect(fp)
     @ns.marshal_with(fp, code=201)
     def post(self):
-        forml2 = api.payload["forml"]
+        forml2  = api.payload["FORML"]
         forml2 = forml2.replace("'", '"'); print(forml2)
-        
+        ret_st  = api.payload["RET_STR"]
+        ret_str = ( True  if ( ret_st == "X" ) else  False )
+        # ret_str = "X"#False
         ret_str = False
         pred = DAO.get(forml2, ret_str)
+        api.payload["FORML"] = "Done"
+
         if ret_str: 
-            api.payload["pred"] = pred
-            api.payload["predC2_0"] = pred[0]
-            api.payload["predC4_0"] = pred[1]
-            api.payload["predC1_0"] = pred[2]
+            api.payload["PRED"] = pred
+            api.payload["PRED_C2_0"] = pred[0]
+            api.payload["PRED_C4_0"] = pred[1]
+            api.payload["PRED_C1_0"] = pred[2]
         else: 
-            api.payload["pred"] = "SEPARATION! ret_str = False!"
+            api.payload["PRED"] = "SEPARATION! ret_str = False!"
             api.payload.update(pred)
 
         return api.payload
         # return DAO.create(api.payload), 201
         # EXAMPLE
         ex = {
-               "forml": "{ 'm':'1', '100023' : 1 }",
-               "pred": "string"
+               "FORML": "{ 'm':'1', '100023' : 1 }",
+               "PRED" : "string"
              }
 
 @api.route('/<string:forml>') # GET! 
