@@ -108,7 +108,8 @@ def mainRun():
 
     execc = get_models(md.DESC)
     for ex in execc:
-        md.spn = ex["spn"]; md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
+        # md.spn = ex["spn"]; 
+        md.dType = ex["dt"]; mr.epochs = ex["e"]; mr.lr = ex["lr"]; mr.h = ex["h"]
         
         md.normalize()  
         mr.ninp, mr.nout, mr.top_k = md.getnn()
