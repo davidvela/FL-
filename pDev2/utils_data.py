@@ -378,7 +378,9 @@ def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jso
     if flag_dsp or force: 
         flag_dsp = False
         # 2 -- READ EXCEL 
-        if pp_excel: dsp = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_tx.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+        if pp_excel: 
+            dsp = pd.read_csv( tf.gfile.Open( LOGDAT + DESC + "/datasc_tx.csv"  ), sep=None, skipinitialspace=True,  engine="python" )
+            dsp = dsp.fillna(0)
         else: # 1 -- READ JSON 
             if url_test != 'url':           # test  file 
                 json_data = url_test + pDataFile

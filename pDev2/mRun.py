@@ -248,7 +248,8 @@ def evaluate( ):
     
     calc_confusion_m( sf, md.dst.loc[:md.spn-1,'FP_P'], "EV")
 
-    return predv.tolist()
+    # return predv.tolist()
+    return sf
 
 def tests(url_test = 'url', p_col=False):  
     print("_____TESTS...")    
