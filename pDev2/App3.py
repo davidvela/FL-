@@ -36,8 +36,7 @@ fp = api.model('fp', {
     'PRED_C1_1': fields.String(required= False,description='Prediction C1')  ,
     'PRED_C1_2': fields.String(required= False,description='Prediction C1')  ,
     'PRED_C1_3': fields.String(required= False,description='Prediction C1')  ,
-    'PRED_C1_4': fields.String(required= False,description='Prediction C1')  
-})
+    'PRED_C1_4': fields.String(required= False,description='Prediction C1')  })
 
 def get_models(type):
     if type == "FRFLO":

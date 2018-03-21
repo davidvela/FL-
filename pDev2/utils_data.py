@@ -1,3 +1,5 @@
+# Utils data - for main program
+
 # tensorboard --logdir=.\my_graph
 # tensorboard => http://localhost:6006 
 # jupyter => http://localhost:8889
