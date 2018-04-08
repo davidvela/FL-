@@ -1,3 +1,3 @@
-# First Light 
-First Ligth idea! 
+# FL
+FL idea! 
 
