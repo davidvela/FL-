@@ -57,7 +57,7 @@ def fc(inp, nodes, kp, is_train):
     h = tf.layers.dense( inp, nodes, use_bias=False, activation=None )
     if md.dType != "C0": h = tf.layers.batch_normalization(h, training=is_train)      # CLASS
     h = tf.nn.relu(h)
-    h = tf.nn.dropout(h, kp)
+    if is_train: h = tf.nn.dropout(h, kp)
     return h
 def build_network2(is_train=False):     # Simple NN - with batch normalization (high level)
     global top_k
@@ -69,7 +69,7 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
     for i in range(len(h)): 
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
-    prediction=tf.reduce_max(y,1)    # CLASS
+    prediction=tf.reduce_max( y ,1)    # CLASS
     # prediction = out                 # REG
 
     # softmaxT = tf.nn.softmax(out)
@@ -88,16 +88,16 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
         tf.summary.scalar("accuracy", accuracy)
 
     return out, accuracy, softmaxT
-def build_network3():
+def build_network3(is_train=False):
     tf.reset_default_graph()
 
     global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y, confusion
 
     print("build network")
-    x = tf.placeholder(tf.float32,   shape=[None, ninp], name="x")
+    x = tf.placeholder(tf.float32,     shape=[None, ninp], name="x")
     # y = tf.placeholder(tf.int16,     shape=[None, nout], name="y")
     y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
-    prediction, accuracy, softmaxT = build_network2()
+    prediction, accuracy, softmaxT = build_network2(is_train=is_train)
     
     # confusion = tf.confusion_matrix(labels=y, predictions=prediction, num_classes=nout)
     
@@ -158,7 +158,7 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     print("____TRAINING...")
     display_step =  disp 
 
-    dataTest = {'label' : [] , 'data' :  [] };
+    dataTest = {'label' : [] , 'data' :  [] }
     if compt: 
         md.get_columns(pp_excel = True )  # True! #md.dsc or dataset? 
         dataTest['data'] = md.dsc.iloc[:, 3:].as_matrix().tolist(); dataTest['label'] = md.dsc.iloc[:, 2].as_matrix().tolist()
@@ -173,13 +173,18 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
     
     total_batch  = int(len(md.dataT['label']) / batch_size)   
     startTime = datetime.now().strftime('%H:%M:%S')
-    with tf.Session() as sess:
+
+    tf_config = tf.ConfigProto(allow_soft_placement=True) #,log_device_placement=True)
+    tf_config.gpu_options.allow_growth = True
+    with tf.Session(config=tf_config  ) as sess:
+    # with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         # restore_model(sess)  #Run if I want to retrain an existing model  
         writer = tf.summary.FileWriter(md.MODEL_DIR + "/tboard/", sess.graph ) # + get_hpar() )
 
         start = time.time()
-        for i in range(it):            
+        for i in range(it):  
+            # try:          
             for ii, (xtb,ytb) in enumerate(md.get_batches(batch_size) ):
                 # xtb, ytb = dc.next_batch(batch_size, dataT['data'], dataT['label'])
                 sess.run(optimizer, feed_dict={x: xtb, y: ytb})
@@ -210,17 +215,17 @@ def train(it = 100, disp=50, batch_size = 128, compt = False):
 
             train_accuracies.append(tr_ac)
             test_accuracies.append(ev_ac)
-
+        #end
         save_path = saver.save(sess, model_path)
         print("Model saved in file: %s" % save_path) 
     print("Optimization Finished!")
 
     logr( it=it, typ='TR', DS=md.DESC, AC=tr_ac,num=len(md.dst)-md.spn, AC3=0, AC10=0, desc=md.des(), startTime=startTime )
     logr( it=it, typ='EV', DS=md.DESC, AC=ev_ac,num=md.spn, AC3=0, AC10=0, desc=md.des() )
-    dataTest = {'label' : [] , 'data' :  [] };
-
+    dataTest = {'label' : [] , 'data' :  [] }
 
 def train_opt( ): 
+    print("____TRAINING OPT...")
     pass
 
 def evaluate( ): 
@@ -418,11 +423,9 @@ def calc_confusion_m( sf, dst, tid="t"):
                             cmap=plt.cm.cool, tid=tid)
 
     
-
-
 #--------------------------------------------------------------
-md.DESC      = "FLALL" # FLALL "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
-ex =  { 'dt':'C4',  "e":100, "lr":0.001, "h":[40 , 40],       "spn": 10000, "pe": [], "pt": []  }
+md.DESC = "FRALL1" # FLALL "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
+ex = { 'dt':'C1',  "e":100, "lr":0.001, "h":[200 , 100, 40],    "spn": 10000, "pe": [], "pt": []  }
 # ex =  { 'dt':'C1',  "e":200, "lr":0.001, "h":[100 , 100, 100], "spn": 10000, "pe": [], "pt": []  }
 
 md.spn       = ex["spn"] 
@@ -432,8 +435,8 @@ lr           = ex["lr"]
 h            = ex["h"]   
 
 ninp, nout   = 10, 10
-disp         = 5
-batch_size   = 128
+disp         = 100
+batch_size   = 32
 final        = "_" #FF or _
 
 def mainRun(): 
@@ -460,7 +463,7 @@ def mainRun():
     #---------------------------------------------------------------
     # NETWORK
     #---------------------------------------------------------------
-    build_network3()
+    build_network3(True)
     print(model_path)
     print( get_nns() )
     clean_traina()
@@ -468,11 +471,10 @@ def mainRun():
     #---------------------------------------------------------------
     # OP.                           comp. 
     #---------------------------------------------------------------
-
     train(epochs, disp, batch_size, True)
+    build_network3(False)
     evaluate( )
-    
-    # tests(url_test, p_col=False  )
+    tests(url_test, p_col=False  )
     vis_chart( )  # visualize the training chart
     print("___The end!")
 

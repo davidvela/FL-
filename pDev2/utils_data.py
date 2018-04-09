@@ -331,7 +331,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True, p_
                     else: 
                         col_key = int(key) #str(int(key)) 
                     
-                    col_key = int(col_key) # or int... 
+                    col_key = str(int(col_key)) # or int... 
                     #if isInt : col_key = int(col_key)     # if comp NOT conatin letters
                     #else: key_wz = col_key = str(col_key)   
 

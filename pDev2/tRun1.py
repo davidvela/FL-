@@ -2,7 +2,7 @@
 # save the results and give a estimation comparing all the model resutls'
 # New version 1. 
 from datetime import datetime
-import mRun as mr
+import mRun1 as mr
 import utils_data as md
 import numpy as np
 import pandas as pd
@@ -98,6 +98,7 @@ def mainRun():
     md.mainRead2(path=ALL_DS, part=1, batch_size=2 ) # For testing I am forced to used JSON - column names and order may be different! 
 
     url_test = md.LOGDAT + "FREXP1/" ; # url_test = "url"
+    batch_size = 128 #128
     force = False; excel = True  # dataFile = "frall2_json.txt"; labelFile = "datal.csv"     
     md.get_tests(url_test, force, excel )
 
@@ -118,14 +119,16 @@ def mainRun():
         md.MODEL_DIR = md.LOGDIR + md.DESC + '/' +  md.MODEL #+"/" 
         mr.model_path = md.MODEL_DIR + "/model.ckpt" 
         
-        mr.build_network3()                                                                                                                                                                                                                                                                                    
+        # Training 
+        mr.build_network3(True)                                                                                                                                                                                                                                                                                    
         print(mr.model_path) 
         mr.clean_traina()
-
-        # mr.train(it= ex["e"], disp=True, batch_size = 128, compt = True)
-        ex["pe"] = mr.evaluate( )
+        mr.train(it= ex["e"], disp=True, batch_size = batch_size, compt = True)
         mr.vis_chart( ) # visualize the training chart
-        
+
+        # Evaluation / Testing
+        mr.build_network3( False )                                                                                                                                                                                                                                                                                    
+        ex["pe"] = mr.evaluate( )
         ex["pt"] = mr.tests(url_test, p_col=False  )
         if rec_test: tsd = record_data( ex, tsd, md.dsp, type = "pt")    
         if rec_eval: tse = record_data( ex, tse, md.dst.iloc[:md.spn, :3], type = "pe")    

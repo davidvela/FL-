@@ -218,7 +218,7 @@ def single_tests():
                                     "131136" :0.0001 , 
                                     "131315" :0.0001 }  ''' 
     # real = 73 #pred 73 high, 77,74...
-    # forml2 = '''{ "m":"1",          "100023" : 1 }    '''
+    # forml2 = '''{ "m":"1",  "100023" : 1 }    '''
 
     real = 54 #pred 57, 58 low prod
     forml2 = '''{ "m":"125660",     "160102" :0.31245 , 
@@ -289,5 +289,5 @@ def single_tests():
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    app.run(host="0.0.0.0", debug=True)  # accessible from the network! 
+    app.run(host="0.0.0.0", debug=False)  # accessible from the network! 
     # single_tests()   
