@@ -69,8 +69,8 @@ def build_network2(is_train=False):     # Simple NN - with batch normalization (
     for i in range(len(h)): 
         hx = fc(inp,  h[i], kp, is_train); inp = hx 
     out = tf.layers.dense( hx, nout, use_bias=False, activation=None )
-    prediction=tf.reduce_max( y ,1)    # CLASS
-    # prediction = out                 # REG
+    # predictiony=tf.reduce_max( y ,1)    # CLASS
+    # prediction = out                    # REG
 
     # softmaxT = tf.nn.softmax(out)
     with tf.name_scope("accuracy"):
@@ -113,6 +113,13 @@ def build_network3(is_train=False):
     saver= tf.train.Saver()
 
 def build_network1( ):
+    tf.reset_default_graph()
+    global prediction, accuracy, softmaxT, cost, summ, optimizer, saver, x, y, confusion
+    print("build network")
+
+    x = tf.placeholder(tf.float32,     shape=[None, ninp], name="x")
+    y = tf.placeholder(tf.float32,     shape=[None, nout], name="y")
+    
     # Simple NN - 2layers - matmul 
     biases  = { 'b1': tf.Variable(tf.random_normal( [ h[0] ]),        name="Bias_1"),
                 'b2': tf.Variable(tf.random_normal( [ h[1] ]),        name="Bias_2"),
@@ -132,15 +139,28 @@ def build_network1( ):
     # Output layer with linear activation
     with tf.name_scope("fc_output"):
         out = tf.matmul(layer_2, weights['out']) + biases['out']
-
-    softmaxT = tf.nn.softmax(out, )
-    prediction=tf.reduce_max(y,1)
+        prediction = out
+    #softmaxT = tf.nn.softmax(out, )
+    softmaxT = tf.nn.top_k(tf.nn.softmax(out), top_k)   
 
     with tf.name_scope("accuracy"):
         correct_prediction = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         tf.summary.scalar("accuracy", accuracy)
-    return out, accuracy, softmaxT, biases, weights
+    
+    #return out, accuracy, softmaxT, biases, weights
+    
+    with tf.name_scope("xent"): #loss
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=prediction, labels=y))
+        if md.dType == "C0": cost = tf.reduce_mean(tf.square(prediction-y) )               # REG
+        tf.summary.scalar("xent", cost)
+    
+    with tf.name_scope("train"): #optimizer
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(cost)
+    
+    summ = tf.summary.merge_all()
+    saver= tf.train.Saver()
+
 def old():
     # prediction, accuracy, softmaxT, biases, weights = build_network1()
     prediction, accuracy, softmaxT = build_network2()
@@ -427,7 +447,7 @@ def calc_confusion_m( sf, dst, tid="t"):
     
 #--------------------------------------------------------------
 md.DESC = "FRALL1" # FLALL "FREXP"  FRFLO FRALL1 || #C1, C2, C4, C0 || #[40 , 10]   [200, 100, 40] [100,100]
-ex = { 'dt':'C1',  "e":105, "lr":0.001, "h":[100 , 100],    "spn": 10000, "pe": [], "pt": []  }
+ex = { 'dt':'C1',  "e":105, "lr":0.001, "h":[1000 , 200],    "spn": 10000, "pe": [], "pt": []  }
 # ex =  { 'dt':'C1',  "e":200, "lr":0.001, "h":[100 , 100, 100], "spn": 10000, "pe": [], "pt": []  }
 
 md.spn       = ex["spn"] 
@@ -437,7 +457,7 @@ lr           = ex["lr"]
 h            = ex["h"]   
 
 ninp, nout   = 10, 10
-disp         = 100
+disp         = 50
 batch_size   = 32
 final        = "_" #FF or _
 
@@ -496,7 +516,4 @@ def mainOPT():
 
 if __name__ == '__main__':
     mainRun()
-
-
-
 
