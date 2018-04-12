@@ -433,16 +433,16 @@ ex = { 'dt':'C1',  "e":105, "lr":0.001, "h":[10000 , 5000],    "spn": 10000, "pe
 #--------------------------------------------------------------
 num = len(sys.argv)
 print("Number of arguments {}".format( num ))
-if num > 1: ex["dt"] = sys.argv[1]; print(sys.argv[1])
+if num > 1: ex["dt"]    = sys.argv[1]; print(sys.argv[1])
 if num > 2: ex["h"][0]  = sys.argv[2]; print(sys.argv[2])  #string!
 if num > 3: ex["h"][1]  = sys.argv[3]; print(sys.argv[3])  #string!
 
 #--------------------------------------------------------------
-md.spn       = ex["spn"] 
 md.dType     = ex["dt"] 
+h            = ex["h"]   
 epochs       = ex["e"] 
 lr           = ex["lr"]
-h            = ex["h"]   
+md.spn       = ex["spn"] 
 
 ninp, nout   = 10, 10
 disp         = 100
