@@ -1,3 +1,8 @@
+""" App v1: REST WS              OBSOLETE!!!!       
+    -----------------------------------------------------------
+    firs attempt - api.model very simplistic (forml, pred)
+    -----------------------------------------------------------
+"""
 from flask import Flask, request
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix

@@ -1,3 +1,9 @@
+""" App v2: REST WS              OBSOLETE!!!!       
+    -----------------------------------------------------------
+    Second attempt - api.model more complex; but limited (f, p, p2,p4,p1)
+    -----------------------------------------------------------
+"""
+
 from flask import Flask, request
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix

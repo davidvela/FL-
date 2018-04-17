@@ -1,6 +1,16 @@
-# tensorboard --logdir=.\_zfp\data\my_graph
-# tensorboard => http://localhost:6006 
-# jupyter => http://localhost:8889
+# -------- NOT USED ANYMORE     OBSOLETE!!!!
+""" MAIN RUN v0:                OBSOLETE!!!!
+    Main model - Network             
+    -----------------------------------------------------------
+    Two types of Network: 
+        - build_network3 - using bn2() and fc() -> High level 
+        - build_network1 - manuall network y = wx + b 
+    -----------------------------------------------------------
+    Useful links 
+        tensorboard --logdir=.\_zfp\data\my_graph
+        tensorboard => http://localhost:6006 
+        jupyter => http://localhost:8889
+"""
 import pandas as pd
 import tensorflow as tf
 import numpy as np

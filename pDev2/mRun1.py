@@ -1,6 +1,14 @@
-# tensorboard --logdir=.\_zfp\data\my_graph
-# tensorboard => http://localhost:6006 
-# jupyter => http://localhost:8889
+""" MAIN RUN v1: Main model - Network
+    -----------------------------------------------------------
+    main improvements: (in process)
+        - GPU optimizations
+        - Train optimization 
+    -----------------------------------------------------------
+    Useful links 
+        tensorboard --logdir=.\_zfp\data\my_graph
+        tensorboard => http://localhost:6006 
+        jupyter => http://localhost:8889
+"""
 import pandas as pd
 import tensorflow as tf
 import numpy as np

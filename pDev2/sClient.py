@@ -1,12 +1,16 @@
-"""A client that talks to tensorflow_model_server
+""" SERVER CLIENT - A client that talks to tensorflow_model_server
+    -----------------------------------------------------------------------
+        Typical usage example:
+            sClient.py --num_tests=100    --server=localhost:9000
+            sClient.py --input=./form.txt --server=localhost:9000
 
-Typical usage example:
-    sClient.py --num_tests=100    --server=localhost:9000
-    sClient.py --input=./form.txt --server=localhost:9000
+        Hint: the code has been compiled together with TensorFlow serving
+        and not locally. The client is called in the TensorFlow Docker container
 
-Hint: the code has been compiled together with TensorFlow serving
-and not locally. The client is called in the TensorFlow Docker container
+        NOTES: You need tf.Serving install -> LINUX 
+    -----------------------------------------------------------
 """
+
 from __future__ import print_function
 # Communication to TensorFlow server via gRPC
 from grpc.beta import implementations

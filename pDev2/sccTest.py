@@ -1,3 +1,9 @@
+""" SERVER MAIN FUNCTIONALLITY TEST 
+    ------------------------------------------
+    Test report before the implementation of the webservice. 
+    -----------------------------------------------------------
+"""
+
 from datetime import datetime
 import mRun as mr
 import utils_data as md

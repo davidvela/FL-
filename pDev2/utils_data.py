@@ -1,4 +1,7 @@
-# Utils data - for main program
+""" UTILS DATA **  : main data manipulation for the Neural Network
+    ---------------------------------------------------
+    ---------------------------------------------------
+"""
 
 # tensorboard --logdir=.\my_graph
 # tensorboard => http://localhost:6006 

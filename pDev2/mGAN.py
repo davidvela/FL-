@@ -1,6 +1,14 @@
-# tensorboard --logdir=.\_zfp\data\my_graph
-# tensorboard => http://localhost:6006 
-# jupyter => http://localhost:8889
+# --------                      EXPERIMENT
+""" MAIN GAN v0:                EXPERIMENT
+    Trying to implement a GAN Network            
+    -----------------------------------------------------------
+    problem generating the loss functions... 
+    -----------------------------------------------------------
+    Useful links 
+        tensorboard --logdir=.\_zfp\data\my_graph
+        tensorboard => http://localhost:6006 
+        jupyter => http://localhost:8889
+"""
 import pandas as pd
 import tensorflow as tf
 import numpy as np

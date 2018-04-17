@@ -1,7 +1,11 @@
-# load the mRun and execute it with different models ... 
-# save the results and give a estimation comparing all the model resutls'
-
-# OLD - Obsolete... 
+# -------- NOT USED ANYMORE     OBSOLETE!!!!
+""" TEST RUN v0  :              OBSOLETE!!!!
+    load the mRun and execute it with different models ...
+    ---------------------------------------------------
+        save the results and give a estimation comparing all the model resutls'
+        Next: Download excel with statistics - Incomplete -> use v1. 
+    ---------------------------------------------------
+"""
 
 from datetime import datetime
 import mRun as mr

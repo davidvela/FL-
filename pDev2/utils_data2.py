@@ -1,4 +1,9 @@
-# Utils data 2 - experiments - testing. 
+""" UTILS DATA 2  : experiments - testing.
+    ---------------------------------------------------
+    The purpose of this file is to generate Datasets from JSON (main1 function)
+    Also, this code can generate statistics and visualization from the data. 
+    ---------------------------------------------------
+"""
 
 import pandas as pd
 import tensorflow as tf

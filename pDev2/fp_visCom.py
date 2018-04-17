@@ -1,3 +1,8 @@
+""" FP Visualization of Components     
+    -----------------------------------------------------------
+    Display FP and Mat. 
+    -----------------------------------------------------------
+"""
 import pandas as pd 
 import numpy as np 
 import tensorflow as tf 
@@ -12,7 +17,7 @@ def c2(df, rv=1):
     if rv == 1:
         if( df < 60 ):                  return [1,0]  
         elif( df >= 60 ):               return [0,1]      
-    elif rf==2: 
+    elif rv==2: 
         if( df < 60 ):                  return 0
         elif( df >= 60 ):               return 1
 def c4(df, rv=1):

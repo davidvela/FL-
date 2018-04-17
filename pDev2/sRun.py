@@ -1,5 +1,9 @@
-#tensorflow serving - export model - protobuf 
-
+""" SERVER RUN v1  : tensorflow serving - export model - protobuf 
+    ---------------------------------------------------
+        Save the results and give a estimation comparing all the model resutls'
+        Improvements:  download excel with statistics
+    ---------------------------------------------------
+"""
 from datetime import datetime
 import tensorflow as tf
 import mRun as mr

@@ -1,6 +1,10 @@
-# load the mRun and execute it with different models ... 
-# save the results and give a estimation comparing all the model resutls'
-# New version 1. 
+""" TEST RUN v1  : load the mRun and execute it with different models ...
+    ---------------------------------------------------
+        save the results and give a estimation comparing all the model resutls'
+        Improvements:  download excel with statistics
+    ---------------------------------------------------
+"""
+
 from datetime import datetime
 import mRun1 as mr
 import utils_data as md

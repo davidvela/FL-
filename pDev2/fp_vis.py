@@ -1,3 +1,8 @@
+""" FP Visualization       
+    -----------------------------------------------------------
+    Display FP and Mat. 
+    -----------------------------------------------------------
+"""
 import pandas as pd 
 import numpy as np 
 import tensorflow as tf 
