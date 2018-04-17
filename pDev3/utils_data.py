@@ -1,8 +1,7 @@
-# Utils data - for main program
-
-# tensorboard --logdir=.\my_graph
-# tensorboard => http://localhost:6006 
-# jupyter => http://localhost:8889
+""" UTILS DATA **  : main data manipulation for the Neural Network
+    ---------------------------------------------------
+    ---------------------------------------------------
+"""
 
 import pandas as pd
 import tensorflow as tf

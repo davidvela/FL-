@@ -1,5 +1,9 @@
-# Utils data 2 - experiments - testing. 
-
+""" UTILS DATA 2  : experiments - testing.
+    ---------------------------------------------------
+    The purpose of this file is to generate Datasets from JSON (main1 function)
+    Also, this code can generate statistics and visualization from the data. 
+    ---------------------------------------------------
+"""
 import pandas as pd
 import tensorflow as tf
 import numpy as np
@@ -219,7 +223,7 @@ def feed_data(dataJJ, d_st = False, pand=False, p_col = False,  p_all = True, p_
                     else: 
                         col_key = int(key) #str(int(key)) 
                     
-                    col_key = int(col_key) # or int... 
+                    col_key = str(int(col_key)) # or int... 
                     #if isInt : col_key = int(col_key)     # if comp NOT conatin letters
                     #else: key_wz = col_key = str(col_key)   
 
@@ -264,7 +268,7 @@ def get_data_test( desc = 1 ):
         
 def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jsonX.txt", pLabelFile = "datalX.csv", p_dst=True, p_all = True ): 
     global dsp, flag_dsp 
-    
+    print(pp_excel)
     if flag_dsp or force: 
         flag_dsp = False
         # 2 -- READ EXCEL 
@@ -280,7 +284,7 @@ def get_tests(url_test='url', force=False, pp_excel=False, pDataFile = "data_jso
                 json_data = json.loads(json_str)
                 #DESC =  'matnrList...'
         
-            dsp = feed_data(json_data ,pand=True, d_st=p_dst, p_all = p_all)       #d_st = display status
+            dsp = feed_data(json_data ,pand=True, d_st=p_dst, p_all = p_all, p_down=True)       #d_st = display status
             
             if p_all: dsp["FP"] = tmpLab      #normalize(2)  # del dsp['FP_P']
         # if p_all: dsp.insert(2, 'FP_P', dsp['FP'].map(lambda x: cc( x )))  
@@ -338,8 +342,8 @@ def testsJ(excel): # old version
     down_excel(dataAll['data'], excel)
 
 # ll_st = 0; ll_en=10000; #ll_en=20000; 26000; 32000; 38000; 44000; 
-ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
-# ll_st = 0; ll_en = 10;
+# ll_st = 44001; ll_en = 50000; #max = 64829 = HTK10719AU
+ll_st = 0; ll_en = 10
 def testsJ2(pDesc, excel=True, split = False, pTest = True):
     start = time.time()
     print("___JSON!___" +  datetime.now().strftime('%H:%M:%S')  )
@@ -349,7 +353,7 @@ def testsJ2(pDesc, excel=True, split = False, pTest = True):
     url_test = LOGDAT + pDesc + "/" ; dataFile = "frall2_json.txt"; labelFile = "datal.csv" 
     
     if pTest:                                               #   disp   all
-        get_tests(url_test, False, False, dataFile, labelFile, False, False ); tmp = dsp;
+        get_tests(url_test, False, False, dataFile, labelFile, False, True ); tmp = dsp
     else: 
         get_columns(False, False, True); tmp = dsc
     
@@ -373,8 +377,6 @@ def simplify_ds( dst, path_down):
 #__________________________________
 # ZEROS 
 #__________________________________
-
-
 # replace amounts for 1 by columns!: 
 def count_zeros_form(dst):
     com = "100023"
@@ -447,10 +449,10 @@ def vis_comp(dst, com):
 def main1():    # convert json2excel_base
     print("hi1")
     # md.mainRead2(ALL_DS, 1, 2, all = True, shuffle = True  ) 
-    pDesc = "FLALL"
-    setDESC(pDesc);
-    mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
-    # testsJ2(pDesc = pDesc, excel=True, split = False, pTest = False)
+    pDesc = "FLALL2"
+    setDESC(pDesc)
+    # mainRead2(ALL_DS, 1, 2, all = False ) # For testing I am forced to used JSON - column names and order may be different! 
+    testsJ2(pDesc = pDesc, excel=True, split = False, pTest = True)
 
 def main2():    # visualization of components
     com = "160102" #c922 - 160102 - 121 dipropylene glycol 
@@ -482,5 +484,5 @@ def main4():     # Average comp
 #main
 if __name__ == '__main__':
     mainRead2(ALL_DS, 1, 2, all = True, shuffle = False ) 
-    main2()
+    main1()
 

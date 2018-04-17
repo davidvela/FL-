@@ -1,3 +1,8 @@
+""" App v3: REST WS     
+    -----------------------------------------------------------
+    Last version - SAP prototype api.model (f, p, p2*2,p4*3,p1*5)
+    -----------------------------------------------------------
+"""
 from flask import Flask, request
 from flask_restplus import Api, Resource, fields
 from werkzeug.contrib.fixers import ProxyFix
